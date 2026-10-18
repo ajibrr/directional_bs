@@ -1,0 +1,207 @@
+# ======================================================================================
+# NIFTY analytics build -- the recipe the pipeline runs on.
+#
+#   python build_charts.py                                   builds with this file
+#
+# Every key is optional: whatever is left out keeps the default in nifty/defaults.py.
+# An unknown section or key is refused rather than ignored, so a typo cannot quietly
+# change a build. Relative paths are relative to the project root.
+# ======================================================================================
+
+[instrument]
+name = "NIFTY 50"
+
+# --------------------------------------------------------------------------------------
+# What a build reads and where it writes
+# --------------------------------------------------------------------------------------
+[paths]
+sources_dir = "input data"                                  # one file per session
+sources_glob = "NIFTY_*_PRICE_1SEC.jsonl"                   # every match is a session;
+                                                            # a dashboard with no tape beside
+                                                            # it is one too (same name,
+                                                            # _DASHBOARD.json)
+template = "templates/sheet.html"
+chart_lib = "vendor/lightweight-charts.standalone.production.js"
+output_dir = "output/nifty"                                  # the NIFTY tree; SENSEX owns
+                                                            # output/sensex, so the two never
+                                                            # share a day folder
+
+# --------------------------------------------------------------------------------------
+# Bar widths, in seconds. "12s", "1m" and 300 all parse; the list must not repeat one.
+# --------------------------------------------------------------------------------------
+[timeframes]
+seconds = ["12s", "36s", "1m", "3m", "5m"]
+
+# --------------------------------------------------------------------------------------
+# Averages. The price ones are drawn on the chart pane (and stay editable in the
+# sheet's toolbar); the analytics ones drive the table and the CSV.
+# --------------------------------------------------------------------------------------
+[sma]
+price_periods = [2, 9, 44]
+
+[analytics]
+periods = [2, 9, 44]
+pct_decimals = 4            # percentage precision, honoured by the pipeline and the sheet
+# run_rule is the sentence the sheet prints for the consecutive counts; it defaults in
+# nifty/defaults.py and can be overridden here.
+
+# --------------------------------------------------------------------------------------
+# The direction row: consecutive candles where the fast average sits above the slow one
+# while the slow one rises (ABOVE), or below it while the slow one falls (BELOW).
+# Both periods must appear in [analytics] periods above -- the row reads that average's
+# printed percentage change. The rule sentence is written from the two periods unless
+# it is overridden here.
+# --------------------------------------------------------------------------------------
+[direction_streak]
+fast_period = 2
+slow_period = 9
+
+# --------------------------------------------------------------------------------------
+# The crossing row and the distance row beneath it.
+#
+#   cross direction : ABOVE when SMA {fast} was below SMA {slow} on the previous candle
+#                     and is above it on this one; BELOW for the mirror image; empty on
+#                     every other candle, and on an equal pair, which is never a strict
+#                     crossing. The first candle of a session has no previous candle.
+#   distance (%)    : ((SMA {distance_from} - SMA {distance_to}) / SMA {distance_to}) * 100
+#                     read on the crossing candle only, at [analytics] pct_decimals.
+#
+# All four periods must appear in [analytics] periods above. The two rule sentences are
+# written from these periods unless they are overridden here.
+# --------------------------------------------------------------------------------------
+[cross]
+fast_period = 2
+slow_period = 9
+distance_from_period = 9
+distance_to_period = 44
+
+# --------------------------------------------------------------------------------------
+# The above/below relationship row: which side of each other two averages sit on, one
+# word per candle.
+#
+#   ABOVE : SMA {fast}  >  SMA {slow} on this candle
+#   BELOW : SMA {fast}  <  SMA {slow} on this candle
+#   empty : the two are equal on that candle (a tie belongs to neither side), or the
+#           slow average does not exist yet, which is every candle before its period.
+#
+# This is the CURRENT relationship, not a crossing: it is read from the candle's own two
+# averages with no previous candle involved, so it holds on every candle both averages
+# exist. It sits in its own row beside the crossing rows rather than replacing them.
+# Both periods must appear in [analytics] periods above. The rule sentence is written
+# from the two periods unless it is overridden here.
+# --------------------------------------------------------------------------------------
+[relation]
+fast_period = 9
+slow_period = 44
+
+# --------------------------------------------------------------------------------------
+# The green arrow: ONE rule, six conditions, all of them required (AND). The first three
+# are read from the candle itself, the last three from the candle before it. Every one of
+# them is an ordinary column the rows above already carry, so the rule invents no series of
+# its own and cannot disagree with what the table shows.
+#
+# The red arrow is that same rule read the other way round, and it is DERIVED rather than
+# declared: the code mirrors this block -- both words flipped, the distance window negated
+# with its ends swapped, the change threshold negated, and the two consecutive-count runs
+# exchanged -- so there are no red thresholds here to keep in step with the green ones, and
+# the two rules can never drift apart. `red_arrow = false` below keeps the column, always 0,
+# and draws no red mark.
+#
+# Every key below is named after the analytics-table row it reads, plus the bound it puts on it
+# (`_min` / `_max`), and that one name is what the code, the payload and the sheet use
+# too -- the recipe, the summary JSON and the drawn arrow all spell a threshold the same
+# way. The period inside each row is set by the section above, not here, so the keys
+# carry the row without the numbers: `distance_pct_at_cross` reads whichever
+# sma{from}_vs_sma{to}_distance_pct_at_cross [cross] names.
+#
+#   analytics-table row read (previous candle: SMA {slow} {chg}, SMA {fast} / {slow} {streak})
+#     1. sma{cross}_vs_sma{cross}_cross_direction        = cross_direction   (ABOVE / BELOW)
+#     2. sma{from}_vs_sma{to}_distance_pct_at_cross      >= distance_pct_at_cross_min
+#                                                         <= distance_pct_at_cross_max
+#     3. sma{fast}_vs_sma{slow}_relation                 = relation          (ABOVE / BELOW)
+#     4. sma{slow}_chg_pct                               >  chg_pct_min      (strictly)
+#     5. sma{fast}_streak_minus (a FALLING run)         -7 to -15: streak_minus_min ..
+#                                                         streak_minus_max
+#     6. sma{slow}_streak_plus  (a RISING run)           >= streak_plus_min
+#
+# The sheet draws the arrow below the bar on the price pane of every timeframe, and the
+# column ships in the CSV and the JSON as 1 (fired) / 0 (did not). The crossing pair and
+# the distance pair are [cross]'s, the run/change pair defaults to [relation]'s and can
+# be named here. Thresholds are compared at [analytics] pct_decimals, both ends included.
+# `enabled = false` keeps the column, always 0, and draws no arrow. Keys below that name a
+# red threshold would be rejected: the mirror has none of its own.
+# --------------------------------------------------------------------------------------
+[signal]
+enabled = true
+cross_direction = "ABOVE"              # row 1, on the current candle
+relation = "ABOVE"                    # row 3, on the current candle
+distance_pct_at_cross_min = 0.0        # row 2, inclusive
+distance_pct_at_cross_max = 0.025      # row 2, inclusive
+use_flow = true                        # row 4: the candle's minute reads pe_oi_change > ce_oi_change
+chg_pct_min = 0.0005                   # row 5, on the previous candle, strictly above
+streak_minus_min = 7                   # row 6, on the previous candle
+streak_minus_max = 15
+streak_plus_min = 7                    # row 7, on the previous candle
+# boolean flags: true = condition is checked, false = condition is skipped
+use_cross_direction = true
+use_distance_pct = true
+use_relation = true
+use_chg_pct = true
+use_streak_minus = true
+use_streak_plus = true
+red_arrow = true                       # draw the mirror rule above the bar as well
+# fast_period / slow_period default to [relation]; rule defaults to a sentence written
+# from the periods and thresholds above, and red_rule to the mirrored sentence (both can
+# be overridden here -- the sentence only, never the thresholds).
+# --------------------------------------------------------------------------------------
+# Independent red arrow conditions (when [red_signal] is present, used instead of mirror)
+[red_signal]
+enabled = true
+cross_direction = "BELOW"              # row 1, on the current candle
+relation = "BELOW"                     # row 3, on the current candle
+distance_pct_at_cross_min = -0.025     # row 2, inclusive (negated window)
+distance_pct_at_cross_max = 0.0        # row 2, inclusive
+use_flow = true                        # row 4: the candle's minute reads ce_oi_change > pe_oi_change
+chg_pct_min = -0.0005                  # row 5, on the previous candle, strictly below
+streak_minus_min = 7                   # row 6, on the previous candle
+streak_minus_max = 15
+streak_plus_min = 7                    # row 7, on the previous candle
+# boolean flags: true = condition is checked, false = condition is skipped
+use_cross_direction = true
+use_distance_pct = true
+use_relation = true
+use_chg_pct = true
+use_streak_minus = true
+use_streak_plus = true
+
+# --------------------------------------------------------------------------------------
+# The trade clock the backtest (nifty/backtest.py) reads, in IST wall clock.
+#
+#   last_entry : no arrow whose candle opens after this is taken. A signal at the time
+#                itself is still taken; a signal after it is reported, not traded.
+#   hard_exit  : a position still open when the clock reaches this is closed there, at
+#                the opening price of that candle, whatever its profit or loss. It is the
+#                rule that ends the day's book, so no trade is ever carried past it.
+# --------------------------------------------------------------------------------------
+[backtest]
+last_entry = "15:10:00"
+hard_exit = "15:15:00"
+
+# --------------------------------------------------------------------------------------
+# The delivered sheet: its name,
+#
+#   window_bars : the candles a timeframe shows when the sheet is opened, sized to fill
+#                 the pane. It is a view, not a truncation -- the rest of the session is
+#                 one drag away, and the arrows, the ten-row table and both exports always
+#                 cover every candle. A double-click snaps a chart back to the latest 100.
+# --------------------------------------------------------------------------------------
+[sheet]
+name_template = "NIFTY_{range_slug}_SMA_sheet.html"
+title_template = "{instrument} \u00b7 {range_label} \u00b7 SMA {sma_slash} analytics"
+window_bars = 100
+
+# ======================================================================================
+# A new analysis is a step in nifty/analysis.py plus a section here. The columns a step
+# declares reach the CSV, the JSON exports and the sheet's payload on their own, so the
+# next section added to this file is the only other thing to write.
+# ======================================================================================

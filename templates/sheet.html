@@ -1,0 +1,2513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PAGE_TITLE__</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --panel:#121821;
+    --panel-2:#161d27;
+    --line:#202a36;
+    --line-2:#2a3644;
+    --text:#e6edf3;
+    --text-2:#a7b4c2;
+    --muted:#6e7d8f;
+    --accent:#58a6ff;
+    --accent-2:#1f6feb;
+    --up:#26a69a;
+    --down:#ef5350;
+    --radius:10px;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1560px;margin:0 auto;padding:22px 22px 64px}
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between;
+    padding:18px 20px;border:1px solid var(--line);border-radius:var(--radius);
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  }
+  .masthead h1{margin:0;font-size:20px;letter-spacing:.2px}
+  .masthead h1 .dot{color:var(--muted);font-weight:400;margin:0 8px}
+  .masthead .sub{margin:6px 0 0;color:var(--text-2);font-size:13px}
+  .masthead .sub code{font-family:var(--mono);color:var(--accent);background:#0d1620;
+    border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px}
+  .stamp{text-align:right;color:var(--muted);font-size:12px;line-height:1.7}
+  .stamp b{color:var(--text-2);font-weight:600}
+
+  /* ---------- kpi grid ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-top:18px}
+  .kpi{
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);
+    padding:12px 14px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .kpi .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.7px}
+  .kpi .v{font-family:var(--mono);font-size:19px;font-weight:600;letter-spacing:-.2px}
+  .kpi .n{color:var(--muted);font-size:11.5px;font-family:var(--mono)}
+  .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--text-2)}
+
+  /* ---------- section framing ---------- */
+  section.block{margin-top:26px}
+  .block-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+  .block-head h2{margin:0;font-size:15px;letter-spacing:.4px;text-transform:uppercase;color:var(--text)}
+  .block-head .hint{color:var(--muted);font-size:12.5px}
+  .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+
+  /* ---------- tabs + toolbars ---------- */
+  .tabbar{
+    display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    border:1px solid var(--line);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;
+    background:var(--panel);padding:8px 10px;
+  }
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{
+    appearance:none;cursor:pointer;border:1px solid transparent;background:transparent;
+    color:var(--text-2);font:inherit;font-weight:600;font-size:13px;
+    padding:8px 13px;border-radius:8px;display:flex;align-items:center;gap:8px;transition:.14s;
+  }
+  .tab:hover{background:var(--panel-2);color:var(--text)}
+  .tab[aria-selected="true"]{background:#0e2033;border-color:var(--accent-2);color:#cfe4ff}
+  .tab .badge{
+    font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--muted);
+    background:#0c1219;border:1px solid var(--line);border-radius:999px;padding:1px 7px;
+  }
+  .tab[aria-selected="true"] .badge{color:var(--accent);border-color:var(--accent-2)}
+  .tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .tools{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+  /* session (day) strip: the timeframe tabs below it apply to whichever day is picked,
+     so every day is read with exactly the same configuration */
+  .daybar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    border:1px solid var(--line);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;
+    background:var(--panel-2);padding:8px 10px;
+  }
+  .daybar .grp-label{
+    color:var(--muted);font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;font-weight:600;
+  }
+  .daytabs{display:flex;gap:6px;flex-wrap:wrap}
+  .dtab{
+    appearance:none;cursor:pointer;border:1px solid transparent;background:transparent;
+    color:var(--text-2);font:inherit;font-weight:600;font-size:13px;
+    padding:7px 12px;border-radius:8px;display:flex;align-items:center;gap:8px;transition:.14s;
+  }
+  .dtab:hover{background:var(--panel);color:var(--text)}
+  .dtab[aria-selected="true"]{background:#0e2033;border-color:var(--accent-2);color:#cfe4ff}
+  .dtab .badge{
+    font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--muted);
+    background:#0c1219;border:1px solid var(--line);border-radius:999px;padding:1px 7px;
+  }
+  .dtab .badge.up{color:var(--up)} .dtab .badge.down{color:var(--down)}
+  .dtab[aria-selected="true"] .badge{border-color:var(--accent-2)}
+  .dtab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .daypanels{display:none}
+  .daypanels[data-active="true"]{display:block}
+
+  .smabar{
+    display:flex;gap:18px;align-items:center;flex-wrap:wrap;
+    border:1px solid var(--line);border-top:1px solid var(--line);background:var(--panel-2);
+    padding:9px 14px;
+  }
+  .smabar .grp-label{
+    color:var(--muted);font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;font-weight:600;
+  }
+  .sma-ctl{display:flex;align-items:center;gap:7px;color:var(--text-2);font-size:12.5px;cursor:pointer}
+  .sma-ctl input[type=number]{
+    width:60px;background:#0c1219;color:var(--text);border:1px solid var(--line-2);
+    border-radius:7px;padding:5px 7px;font:600 12.5px var(--mono);
+  }
+  .sma-ctl input[type=checkbox]{
+    width:15px;height:15px;accent-color:var(--accent-2);cursor:pointer;
+  }
+  .sma-ctl .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .sma-ctl.is-off{opacity:.45}
+  .smabar .fixed-note{color:var(--muted);font-size:11.5px;font-family:var(--mono)}
+  button.ghost{
+    appearance:none;cursor:pointer;background:#0c1219;color:var(--text-2);
+    border:1px solid var(--line-2);border-radius:7px;padding:6px 11px;font:600 12.5px inherit;
+    transition:.14s;
+  }
+  button.ghost:hover{color:var(--text);border-color:var(--accent-2);background:#0e2033}
+
+  /* ---------- panels ---------- */
+  .panel{display:none;margin-top:0}
+  .panel[data-active="true"]{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+  .panel-inner{border:1px solid var(--line);border-radius:0 0 var(--radius) var(--radius);overflow:hidden}
+  .panel-head{
+    display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;justify-content:space-between;
+    background:var(--panel-2);padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .panel-head h3{margin:0;font-size:14px;display:flex;align-items:center;gap:9px}
+  .panel-head h3 .idx{
+    font-family:var(--mono);font-size:10.5px;color:var(--accent);background:#0e2033;
+    border:1px solid var(--accent-2);border-radius:5px;padding:2px 6px;letter-spacing:.5px;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    font-family:var(--mono);font-size:11.5px;color:var(--text-2);
+    background:#0c1219;border:1px solid var(--line);border-radius:6px;padding:3px 8px;white-space:nowrap;
+  }
+  .chip b{color:var(--text);font-weight:600}
+  .chip.up b{color:var(--up)} .chip.down b{color:var(--down)}
+
+  /* the chart element holds ONE pane: the candles with the price averages over them, the
+     time axis under it. The SMA 2 / 9 / 44 analytics are read from the table below (and
+     the exports) rather than plotted over the candles. */
+  .chart-wrap{position:relative;border-bottom:1px solid var(--line);background:var(--panel)}
+  .chart{height:560px;width:100%}
+  /* the flow chart is one pane too, but its two lines need less room than the candles */
+  .chart.flow{height:420px}
+  .chart-legend{
+    position:absolute;top:10px;left:12px;z-index:5;pointer-events:none;
+    display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;
+    font-family:var(--mono);font-size:12px;color:var(--text-2);
+    background:rgba(11,15,20,.72);border:1px solid var(--line);border-radius:8px;
+    padding:8px 12px;backdrop-filter:blur(3px);max-width:calc(100% - 24px);
+  }
+  .chart-legend .lg-title{color:var(--text);font-weight:600;letter-spacing:.3px}
+  .chart-legend .lg-k{color:var(--muted)}
+  .chart-legend .lg-v{color:var(--text);font-weight:600}
+  .chart-legend .swatch{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+
+  /* the cursor badge: the four analytics families for the candle under the pointer, so
+     the counts / streak / crossing do not have to be picked out of the long strip above.
+     It never takes the pointer, never lays out on hover (transform only) and is hidden in
+     print -- the printed sheet carries the table itself. */
+  .cursor-badge{
+    position:absolute;top:0;left:0;z-index:6;pointer-events:none;display:none;
+    font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--text-2);
+    background:rgba(11,15,20,.88);border:1px solid var(--line);border-radius:7px;
+    padding:6px 10px;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.4)
+  }
+  .cursor-badge[data-on="true"]{display:block}
+  .cursor-badge .cb-head{color:var(--text);font-weight:600;letter-spacing:.3px;display:block}
+  .cursor-badge .cb-k{color:var(--muted);display:inline-block;min-width:62px}
+  .cursor-badge .cb-v{color:var(--text);font-weight:600}
+
+  /* ---------- the analytics table ---------- */
+  .ind-block{background:var(--panel);border-top:1px solid var(--line)}
+  .ind-block > header{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+    padding:11px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
+  }
+  .ind-block > header h4{margin:0;font-size:13px;letter-spacing:.3px;display:flex;align-items:center;gap:9px}
+  .ind-block > header h4 .tag2{
+    font-family:var(--mono);font-size:10.5px;color:#cfe4ff;background:#0e2033;
+    border:1px solid var(--accent-2);border-radius:5px;padding:1px 6px;letter-spacing:.4px;
+  }
+  .ind-block > header .meta{color:var(--muted);font-size:12px;font-family:var(--mono)}
+
+  /* one column per candle, so the table is wide by construction: horizontal scroll,
+     with the row-label column and the candle-time row pinned */
+  .an-scroll{
+    max-height:260px;overflow:auto;background:#0f151d;
+    border-top:1px solid var(--line);
+  }
+  table.an{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:11.5px}
+  table.an th,table.an td{
+    padding:5px 9px;text-align:right;white-space:nowrap;
+    border-bottom:1px solid #171e27;border-right:1px solid #151b23;
+  }
+  table.an thead th{
+    position:sticky;top:0;z-index:3;background:#0c1219;color:var(--muted);
+    font-weight:600;font-size:10.5px;letter-spacing:.4px;
+    border-bottom:1px solid var(--line-2);
+  }
+  table.an thead th.is-hover{background:#16304d;color:#cfe4ff}
+  table.an th.rowlab{
+    position:sticky;left:0;z-index:4;text-align:left;color:var(--text);
+    background:#0f151d;font-weight:600;white-space:nowrap;
+    border-right:1px solid var(--line-2);min-width:168px;
+  }
+  table.an thead th.rowlab{z-index:5;background:#0c1219;color:var(--text-2)}
+  table.an td.is-hover{background:rgba(88,166,255,.14)}
+  table.an th.rowlab.up-b{color:#7ee2d4} table.an th.rowlab.down-b{color:#ff9d9a}
+  table.an td.blank{color:#3a4655}
+  .an-scroll::-webkit-scrollbar{height:11px;width:11px}
+  .an-scroll::-webkit-scrollbar-thumb{background:#27313e;border-radius:6px}
+
+  /* ---------- tables ---------- */
+  .table-block{background:var(--panel)}
+  .table-block > header{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+    padding:11px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
+  }
+  .table-block > header h4{margin:0;font-size:13px;letter-spacing:.3px}
+  .table-block > header .meta{color:var(--muted);font-size:12px;font-family:var(--mono)}
+  .table-scroll{max-height:430px;overflow:auto;display:none}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12px}
+  thead th{
+    position:sticky;top:0;z-index:2;background:#0f151d;color:var(--muted);
+    text-align:right;font-weight:600;font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;
+    padding:9px 10px;border-bottom:1px solid var(--line-2);white-space:nowrap;
+  }
+  thead th.l{text-align:left}
+  tbody td{padding:6px 10px;text-align:right;border-bottom:1px solid #171e27;white-space:nowrap;color:var(--text-2)}
+  tbody td.l{text-align:left;color:var(--text)}
+  tbody tr:hover td{background:#151d27}
+  tbody tr.is-hover td{background:rgba(88,166,255,.16) !important}
+
+  /* ---------- comparison matrix ---------- */
+  .matrix{width:100%;border:1px solid var(--line);border-radius:var(--radius);overflow:auto;background:var(--panel)}
+  .matrix table{font-size:12.5px}
+  .matrix thead th{font-size:11px}
+  .matrix tbody th{
+    text-align:left;font-weight:600;color:var(--text);background:#0f151d;
+    padding:8px 12px;border-bottom:1px solid #171e27;position:sticky;left:0;z-index:1;
+  }
+  .matrix td{padding:8px 12px;border-bottom:1px solid #171e27;text-align:right;font-family:var(--mono);color:var(--text-2)}
+  .matrix td:first-of-type{color:var(--text)}
+  .matrix tbody tr:last-child th,.matrix tbody tr:last-child td{border-bottom:none}
+
+  /* ---------- footer ---------- */
+  footer.notes{
+    margin-top:26px;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--panel);padding:16px 20px;color:var(--text-2);font-size:12.5px;
+  }
+  footer.notes h4{margin:0 0 8px;color:var(--text);font-size:13px;letter-spacing:.3px}
+  footer.notes ul{margin:0;padding-left:18px}
+  footer.notes li{margin:4px 0}
+  footer.notes code{font-family:var(--mono);color:var(--accent);background:#0d1620;
+    border:1px solid var(--line);border-radius:4px;padding:0 5px}
+  .foot-note{margin-top:14px;color:var(--muted);font-size:11.5px;text-align:center;font-family:var(--mono)}
+
+  @media (max-width:820px){
+    .chart{height:430px}
+    .tools{margin-left:0;width:100%}
+  }
+
+  /* Print / export-to-PDF: stack every timeframe, nothing truncated. The class is
+     added on beforeprint so the panels are laid out BEFORE the snapshot is taken,
+     otherwise charts lazily built inside display:none panels would render blank. */
+  body.js-printing .panel{display:block;animation:none}
+  body.js-printing .panel .chart{height:380px}
+  /* printing covers the active session only: five single-pane panels */
+  body.js-printing .daypanels{display:none}
+  body.js-printing .daypanels[data-active="true"]{display:block}
+  body.js-printing .cursor-badge{display:none}
+
+  @media print{
+    :root{--bg:#fff;--panel:#fff;--panel-2:#fff;--text:#000;--text-2:#333;--muted:#666;--line:#ccc;--line-2:#999}
+    body{background:#fff}
+    .tabbar,.smabar,.daybar{display:none}
+    .panel{display:block !important;break-inside:avoid}
+    .panel:not([data-active="true"]) .chart{height:380px}
+    .chart{break-inside:avoid}
+    #flowsection .chart{height:320px}
+    .cursor-badge{display:none !important}
+    .an-scroll{max-height:none;overflow:visible}
+    .table-scroll{display:block;max-height:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ 0. MASTHEAD ============ -->
+  <header class="masthead">
+    <div>
+      <h1 id="title">NIFTY 50</h1>
+      <p class="sub" id="subtitle"></p>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <!-- ============ 1. SESSION KPIs ============ -->
+  <section class="block" aria-labelledby="h-kpi">
+    <div class="block-head">
+      <h2 id="h-kpi">1 · Session snapshot</h2>
+      <span class="hint">Aggregated from the raw 1-second tick file</span>
+      <span class="rule"></span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <!-- ============ 2. TIMEFRAME EXPLORER ============ -->
+  <section class="block" aria-labelledby="h-tf">
+    <div class="block-head">
+      <h2 id="h-tf">2 · Timeframe explorer</h2>
+      <span class="hint">Switch tabs for the sub-minute and minute bars · hover a chart for the crosshair read-out · wheel = zoom · drag = pan · double-click = latest 100</span>
+      <span class="rule"></span>
+    </div>
+
+    <div class="daybar">
+      <span class="grp-label">Session</span>
+      <nav class="daytabs" id="daytabs" role="tablist" aria-label="Session date"></nav>
+      <span class="hint" id="daysrc"></span>
+    </div>
+
+    <div class="tabbar">
+      <nav class="tabs" role="tablist" aria-label="Timeframe"></nav>
+      <div class="tools">
+        <button class="ghost" id="btn-fit" type="button">Reset zoom</button>
+        <button class="ghost" id="btn-csv" type="button">Export CSV</button>
+        <button class="ghost" id="btn-json" type="button">Export JSON</button>
+      </div>
+    </div>
+    <div class="smabar" id="smabar"></div>
+
+    <div id="panels"></div>
+  </section>
+
+  <!-- ============ 3. COMPARISON MATRIX ============ -->
+  <section class="block" aria-labelledby="h-mx">
+    <div class="block-head">
+      <h2 id="h-mx">3 · Timeframe comparison</h2>
+      <span class="hint">Same session, resampled across five scales — read across to see how smoothing changes the picture</span>
+      <span class="rule"></span>
+    </div>
+    <div class="matrix" id="matrix"></div>
+  </section>
+
+  <!-- ============ 4. CE / PE OI CHANGE ============ -->
+  <section class="block" aria-labelledby="h-flow" id="flowsection">
+    <div class="block-head">
+      <h2 id="h-flow">4 · CE / PE OI change</h2>
+      <span class="hint">One row per minute from the session's dashboard file · the feed's own <code>ce_oi_change</code> / <code>pe_oi_change</code> · hover for the read-out</span>
+      <span class="rule"></span>
+    </div>
+    <div class="panel-inner">
+      <div class="chart-wrap">
+        <div class="chart-legend" id="flow-legend"></div>
+        <div class="chart flow" id="flow-chart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. METHOD ============ -->
+  <footer class="notes">
+    <h4>5 · Method &amp; provenance</h4>
+    <ul>
+      <li><b>Resampling.</b> The 1-second tape is bucketed on wall-clock IST boundaries (<code>epoch − epoch % tf</code>). Open = first tick in the bucket, close = last tick, high/low = extremes, <code>ticks</code> = samples seen. The IST offset (19,800 s) divides exactly by 12/36/60/180/300, so every timeframe aligns to the IST clock.</li>
+      <li><b>Moving averages.</b> Simple moving averages of the bar <i>close</i> at periods <b>2, 9 and 44</b>, plotted together on the price pane -- the sheet's only pane. The period of each price line is editable in the toolbar; the analytics rows stay fixed at <b>2, 9 and 44</b>.</li>
+      <li><b>Chart window.</b> Every timeframe opens on its most recent <b id="m-window">100</b> candles (<code>[sheet] window_bars</code> in the recipe) and sizes the bars to fill the pane, so the five panels open at the same readable scale. Drag or scroll right for the earlier bars and left back towards the latest. The window is a view, not a truncation: the arrows, the ten-row table and both exports cover the <i>whole</i> session. A double-click snaps a chart back to the latest <span id="m-window-tail">100</span>.</li>
+      <li><b>Analytics table.</b> Ten metric rows beneath the chart, one column per candle: <code>Candle/Time</code>, then <code>SMA 2/9/44 Change (%)</code>, then <code>SMA 2/9/44 Consecutive Count (+N / −N)</code>, then <code>SMA 2 vs SMA 9 Direction Streak (+ABOVE / −BELOW)</code>, then the two crossing rows — <code>SMA 2 vs SMA 9 Cross Direction</code> and <code>SMA 9 vs SMA 44 Distance (%) at SMA 2/SMA 9 Cross</code> — and last <code>SMA 9 vs SMA 44 (ABOVE / BELOW)</code>.</li>
+      <li><b>Percentage change.</b> <code>(current SMA − previous SMA) / previous SMA × 100</code>, per candle and independent for each period. A candle whose previous SMA does not exist yet (the first <i>n</i>−1 candles) is left blank, and a zero previous value is guarded against division by zero.</li>
+      <li><b>Consecutive counts.</b> Each row reports the length of the <i>current unbroken run</i>, not a running total: a rise extends the rising run and drops the falling run to 0; a fall does the mirror image; a reversal therefore starts a new run at <code>+1</code> (or <code>−1</code>); a change of exactly zero resets <b>both</b> runs to 0. The three periods are counted independently, so a fresh rise after a fall reads <code>+1 / −0</code>.</li>
+      <li><b>Direction streak.</b> The seventh row pairs SMA 2 with SMA 9. <code>+n / −0</code> counts consecutive candles in which SMA 2 is <i>above</i> SMA 9 while SMA 9 is rising; <code>+0 / −n</code> counts consecutive candles in which SMA 2 is <i>below</i> SMA 9 while SMA 9 is falling. Only one side can ever be non-zero. A candle that satisfies neither rule — the two averages equal, or SMA 9's change rounding to <code>0.0000</code> — resets the row to <code>+0 / −0</code>, so a switch from BELOW to ABOVE (or the reverse) starts the new streak at 1.</li>
+      <li><b>Crossing rows.</b> The eighth row names the candle on which SMA 2 swapped sides of SMA 9: <code>ABOVE</code> when SMA 2 was below SMA 9 on the previous candle and is above it now, <code>BELOW</code> for the mirror image, and empty when the pair stayed on the same side, either candle's two averages are equal, either average is unavailable, or it is the session's first candle — there is no previous candle to compare with. The ninth row prints the signed distance <code>((SMA 9 − SMA 44) / SMA 44) × 100</code> read on that crossing candle itself, and stays empty when there is no crossing, when either average is unavailable, or when SMA 44 is zero. Both rows are descriptive: they name where a change of side happened and how far the slow pair sat apart at that moment.</li>
+      <li><b>Relationship row.</b> The tenth row prints which side of each other SMA 9 and SMA 44 sit on, one word per candle: <code>ABOVE</code> when SMA 9 is above SMA 44 on that candle, <code>BELOW</code> when it is below, and empty when the two are equal or SMA 44 has no value yet. Unlike the crossing row this is a comparison of the candle's own two averages, with no previous candle involved, so it holds on every candle both averages exist — it answers "which side are they on", not "when did they swap".</li>
+      <li><b>Green arrow.</b> <span id="m-off"></span>The first of the sheet's <b>two</b> marker rules. A green arrow is drawn <i>below the bar</i> on the price pane of every timeframe on the candles where <b>all seven</b> conditions hold — on the candle itself: the <code id="m-cross-pair">SMA 2 vs SMA 9</code> cross reading <code id="m-cross-dir">ABOVE</code>, the <code id="m-distance-pair">SMA 9 vs SMA 44</code> distance (%) that cross carried inside <code id="m-distance-window">0.0000 – 0.0250</code> (both ends included), the <code id="m-relation-pair">SMA 9 vs SMA 44</code> relationship reading <code id="m-relation-dir">ABOVE</code>, and the dashboard's minute the candle opens in reading <code id="m-flow-above">pe_oi_change</code> above <code id="m-flow-below">ce_oi_change</code>; and on the candle before it: the <code id="m-chg-period">SMA 44</code> change (%) strictly <span id="m-chg-side">above</span> <code id="m-chg-min">0.0005</code>, an <code id="m-minus-period">SMA 9</code> consecutive count that is a <span id="m-minus-dir">falling</span> run of <b id="m-minus-run">7 to 15</b>, and an <code id="m-plus-period">SMA 44</code> consecutive count that is a <span id="m-plus-dir">rising</span> run of <b id="m-plus-run">7 or more</b>. That is a seven-condition AND, not a score: one condition missing and no arrow is drawn, and the session's first candle can never carry one because it has no previous candle to read. The flow pair is the session's own dashboard column for that minute, not a sum or a difference the sheet computes — and a session that ships no dashboard has no such reading, so that one condition is not read for it rather than being read as a zero. Every threshold lives in the recipe's <code>[signal]</code> block and travels in the payload with the session. The rule runs on all five timeframes — a coarse tape may simply never satisfy the distance window, and then it shows 0 rather than nothing — each timeframe's arrows are counted in its panel chips and in the comparison matrix, the candle under the pointer reads its own arrow in the cursor badge, and the same flag ships as the <code>green_arrow</code> column (<code>1</code> / <code>0</code>) in the CSV and the JSON, so the drawn arrow and the exported number are one value. Nothing else in this sheet draws a marker or states a verdict.</li>
+      <li><b>Red arrow.</b> <span id="r-off"></span>The second of the sheet's two marker rules, and the exact mirror of the first. A red arrow is drawn <i>above the bar</i> on the price pane of every timeframe on the candles where <b>all seven</b> conditions hold the other way round — on the candle itself: the <code id="r-cross-pair">SMA 2 vs SMA 9</code> cross reading <code id="r-cross-dir">BELOW</code>, the <code id="r-distance-pair">SMA 9 vs SMA 44</code> distance (%) that cross carried inside <code id="r-distance-window">−0.0250 – 0.0000</code> (both ends included), the <code id="r-relation-pair">SMA 9 vs SMA 44</code> relationship reading <code id="r-relation-dir">BELOW</code>, and the dashboard's minute the candle opens in reading <code id="r-flow-above">ce_oi_change</code> above <code id="r-flow-below">pe_oi_change</code>; and on the candle before it: the <code id="r-chg-period">SMA 44</code> change (%) strictly <span id="r-chg-side">below</span> <code id="r-chg-min">−0.0005</code>, an <code id="r-minus-period">SMA 9</code> consecutive count that is a <span id="r-minus-dir">rising</span> run of <b id="r-minus-run">7 to 15</b>, and an <code id="r-plus-period">SMA 44</code> consecutive count that is a <span id="r-plus-dir">falling</span> run of <b id="r-plus-run">7 or more</b>. It is not a second set of numbers to keep in step: the recipe declares <b>one</b> rule, the green one, and this rule is derived from it — every word flipped, the distance window negated with its ends swapped, the change threshold negated, the two consecutive-count runs exchanged, and the two sides of the flow comparison swapped — so the red arrow is the green rule read the other way round and the two can never drift apart. A candle carries one arrow or the other and never both, because an ABOVE crossing and a BELOW one cannot happen on the same candle. Every value printed here travels in the payload's own <code>redSignal</code> block, so a reader can check the mirror against the <code>signal</code> block it inverts, number by number. <code>[signal] red_arrow = false</code> keeps the column, always <code>0</code>, and drops the marks. The rule is counted on its own in the panel chips, the comparison matrix and the summary's <code>redSignal</code> funnel, the cursor badge reads its own line, and it ships as the <code>red_arrow</code> column (<code>1</code> / <code>0</code>) beside the green one in the CSV and the JSON.</li>
+      <li><b>CE / PE OI change.</b> A session whose dashboard ships beside its tape &mdash; or on its own, since the feed's dashboard carries the session's per-second prices too &mdash; (<code>NIFTY_&lt;date&gt;_DASHBOARD.json</code>) also gets the fourth section: one chart drawn from the dashboard's own <code>flow</code> list, one row per minute, plotting that minute's <code>ce_oi_change</code> and <code>pe_oi_change</code> — the call and put open-interest change the feed reports for the minute, which can be negative, so the two lines read against a dashed zero line. They share one pane and one IST time axis with the candles — each timestamp is converted to the same epoch the bars carry — and the legend reads the minute under the pointer, printing the feed's two figures and nothing else. Both columns are plotted exactly as supplied: nothing is summed, differenced, resampled or smoothed, and the price chart stays the sheet's only price pane. A session that ships no dashboard file hides the section rather than drawing an empty chart, so the day strip can still move across sessions.</li>
+      <li><b>Crosshair.</b> Hover anywhere on a timeframe for a live read-out of time, OHLC, change, all three averages, all three indicator changes, all three run lengths, the SMA 2 vs SMA 9 direction streak, the selected candle's cross direction with the SMA 9 vs SMA 44 distance it carried, and which side those two averages sit on; the matching candle column and ledger row highlight. Inside the chart, a cursor badge repeats the analytics families for the candle under the pointer.</li>
+      <li><b>Rebuild.</b> <code>python build_charts.py</code> regenerates this sheet plus the CSV/JSON exports under <code>output/data/</code>.</li>
+    </ul>
+    <p class="foot-note" id="foot"></p>
+  </footer>
+</div>
+
+<script>/*__CHART_LIB__*/</script>
+<script id="payload" type="application/json">__DATA_JSON__</script>
+<script>
+(function () {
+  "use strict";
+
+  var LWC = window.LightweightCharts;
+  var DATA = JSON.parse(document.getElementById("payload").textContent);
+  var META = DATA.meta;
+  var IST = 19800; // UTC+05:30
+
+  /* Averages drawn on the price pane. Their periods are editable, but ONLY these
+     lines follow the inputs -- the analytics table is pinned to
+     ANALYTICS_PERIODS so the analytics never silently change meaning. */
+  var PRICE_DEFS = [
+    { id: "sma2", period: 2, color: "#58a6ff" },
+    { id: "sma9", period: 9, color: "#f0b90b" },
+    { id: "sma44", period: 44, color: "#a371f7" }
+  ];
+  var ANALYTICS_PERIODS = (META.analyticsSmas || [2, 9, 44]);
+  var AN_COLOR = { 2: "#58a6ff", 9: "#f0b90b", 44: "#a371f7" };
+
+  /* The direction-streak row pairs the two shortest analytics averages: SMA 2 against
+     SMA 9. Its periods and its rule come from the payload, so the sheet and the CSV
+     describe the row the same way. */
+  var DIR_CFG = META.directionStreak || {};
+  var DIR_FAST = DIR_CFG.fastPeriod || 2;
+  var DIR_SLOW = DIR_CFG.slowPeriod || 9;
+  var DIR_RULE = DIR_CFG.rule ||
+    ("ABOVE: SMA " + DIR_FAST + " > SMA " + DIR_SLOW + " and the SMA " + DIR_SLOW +
+     " change (%) is positive; BELOW: SMA " + DIR_FAST + " < SMA " + DIR_SLOW +
+     " and the SMA " + DIR_SLOW + " change (%) is negative; anything else resets both to 0");
+  var DIR_ABOVE_COL = "sma" + DIR_FAST + "_vs_sma" + DIR_SLOW + "_above_streak";
+  var DIR_BELOW_COL = "sma" + DIR_FAST + "_vs_sma" + DIR_SLOW + "_below_streak";
+
+  /* The two crossing rows. Row A8 marks the candle on which SMA <fast> swapped sides
+     with SMA <slow>; row A9 carries, on that same candle, the signed distance between
+     two other averages. Periods and rules come from the payload, so the sheet, the CSV
+     and the pipeline describe these rows the same way. */
+  var CROSS_CFG = META.cross || {};
+  var X_FAST = CROSS_CFG.fastPeriod || 2;
+  var X_SLOW = CROSS_CFG.slowPeriod || 9;
+  var X_FROM = CROSS_CFG.distanceFromPeriod || 9;
+  var X_TO = CROSS_CFG.distanceToPeriod || 44;
+  var CROSS_RULE = CROSS_CFG.rule ||
+    ("ABOVE: SMA " + X_FAST + " was below SMA " + X_SLOW + " on the previous candle and " +
+     "is above it on this one; BELOW: the mirror image; an equal pair is never a crossing");
+  var CROSS_DISTANCE_RULE = CROSS_CFG.distanceRule ||
+    ("the signed distance ((SMA " + X_FROM + " - SMA " + X_TO + ") / SMA " + X_TO +
+     ") * 100 on the crossing candle, at the sheet's own percentage precision");
+  var CROSS_COL = "sma" + X_FAST + "_vs_sma" + X_SLOW + "_cross_direction";
+  var CROSS_DIST_COL = "sma" + X_FROM + "_vs_sma" + X_TO + "_distance_pct_at_cross";
+  var CROSS_PAIR_COL = "sma" + X_FAST + "_vs_sma" + X_SLOW + "_distance_pct_at_cross";
+
+  /* The above/below relationship row: which side of each other SMA 9 and SMA 44 sit on,
+     one word per candle. Periods and rule come from the payload, like every other row. */
+  var REL_CFG = META.relation || {};
+  var R_FAST = REL_CFG.fastPeriod || 9;
+  var R_SLOW = REL_CFG.slowPeriod || 44;
+  var REL_RULE = REL_CFG.rule ||
+    ("ABOVE when SMA " + R_FAST + " > SMA " + R_SLOW + " on this candle; BELOW when it " +
+     "is below it; empty when the two are equal or either one is unavailable");
+  var REL_COL = "sma" + R_FAST + "_vs_sma" + R_SLOW + "_relation";
+
+  /* The dashboard's two per-minute columns, carried on every bar of the payload. They are
+     an input like `atm` and `ticks` -- not a derived series -- and the flow condition of
+     both rules compares the pair. */
+  var CE_OI_COL = "ce_oi_change";
+  var PE_OI_COL = "pe_oi_change";
+
+  /* The sheet's two marker rules -- the green arrow, and the red one that mirrors it.
+     Each is ONE rule of seven conditions, all required (AND). The first four are read from
+     this candle, the last three from the candle before it:
+
+       current   the SMA {cross} vs SMA {cross} cross direction reads the given word
+       current   the distance (%) that cross carried is inside the window, both ends in
+       current   the SMA {fast} vs SMA {slow} relationship reads the given word
+       current   the dashboard's minute this candle opens in reads {flowAbove} above
+                 {flowBelow}; a session with no dashboard does not read this condition
+       previous  the slow average's change (%) is beyond its threshold on the given side
+       previous  the fast average's consecutive count is a run of the rule's own direction
+                 inside its window -- the opposite run is zero, a run being one or other
+       previous  the slow average's consecutive count is a run of the other direction at
+                 least that long
+
+     Every period, word and threshold comes from the payload, and the two thresholds that
+     are read off a percentage arrive as the scaled integers the pipeline compared in --
+     so an arrow here cannot land on a different candle than the CSV's flag. The mirror is
+     data and not a second implementation: `chgAbove` says which side of the change
+     threshold counts, `fastRun` / `slowRun` name the two run columns, `flowAbove` /
+     `flowBelow` name the dashboard pair in the order this rule compares them, and
+     `inverted` picks the mark, the colour and the side of the bar. The green arrow is drawn below the bar on
+     the price pane of every timeframe and the red one above it; nothing else in this sheet
+     draws a marker. */
+  function arrowRule(cfg, fallbackColumn, fallbackLabel, fallbackMark, fallbackPosition) {
+    var dp = META.pctDecimals || 4;
+    var rule = {
+      on: cfg.enabled !== false,
+      column: cfg.column || fallbackColumn,
+      label: cfg.label || fallbackLabel,
+      mark: cfg.mark || fallbackMark,
+      position: cfg.markerPosition || fallbackPosition,
+      inverted: cfg.inverted === true,
+      xFast: cfg.crossFastPeriod || X_FAST,     /* the crossing row it reads */
+      xSlow: cfg.crossSlowPeriod || X_SLOW,
+      from: cfg.distanceFromPeriod || X_FROM,   /* the distance row it reads */
+      to: cfg.distanceToPeriod || X_TO,
+      fast: cfg.fastPeriod || R_FAST,           /* the pair its runs are read from */
+      slow: cfg.slowPeriod || R_SLOW,
+      crossDirection: cfg.crossDirection || "ABOVE",
+      relation: cfg.relation || "ABOVE",
+      distanceMin: (cfg.distancePctAtCrossMinScaled === undefined)
+        ? 0 : cfg.distancePctAtCrossMinScaled,
+      distanceMax: (cfg.distancePctAtCrossMaxScaled === undefined)
+        ? 250 : cfg.distancePctAtCrossMaxScaled,
+      chgMin: (cfg.chgPctMinScaled === undefined) ? 5 : cfg.chgPctMinScaled,
+      chgAbove: cfg.chgAbove !== false,
+      streakMinusMin: cfg.streakMinusMin || 7,
+      streakMinusMax: cfg.streakMinusMax || 15,
+      streakPlusMin: cfg.streakPlusMin || 7,
+      fastRun: cfg.fastRun || "minus",
+      slowRun: cfg.slowRun || "plus",
+      /* the dashboard pair the flow condition compares: the column that must be the
+         greater, then the other. The mirror arrives with the two names already swapped,
+         so this rule and its mirror are one comparison read two ways. */
+      flowAbove: cfg.flowAbove || "pe_oi_change",
+      flowBelow: cfg.flowBelow || "ce_oi_change",
+      useFlow: cfg.useFlow !== false,
+      dp: dp
+    };
+    /* the two run columns this rule reads, and the change column, built here so no other
+       line has to know which direction it is reading */
+    rule.fastRunColumn = "sma" + rule.fast + "_streak_" + rule.fastRun;
+    rule.slowRunColumn = "sma" + rule.slow + "_streak_" + rule.slowRun;
+    rule.slowChgColumn = "sma" + rule.slow + "_chg_pct";
+    rule.rule = cfg.rule || (
+      (rule.inverted ? "RED" : "GREEN") + " ARROW: the " + rule.xFast + "v" + rule.xSlow +
+      " cross reads " + rule.crossDirection + ", the " + rule.from + "v" + rule.to +
+      " distance at that cross is " + fmtScaled(rule.distanceMin, dp) + " to " +
+      fmtScaled(rule.distanceMax, dp) + " inclusive, " + rule.fast + "v" + rule.slow +
+      " reads " + rule.relation + " and the previous candle's SMA " + rule.slow +
+      " change % (" + (rule.chgAbove ? "above" : "below") + " " +
+      fmtScaled(rule.chgMin, dp) + "), SMA " + rule.fast + " run (" + rule.streakMinusMin +
+      " to " + rule.streakMinusMax + " " + rule.fastRun + ") and SMA " + rule.slow +
+      " run (" + rule.streakPlusMin + " or more " + rule.slowRun + "), and the " +
+      "dashboard's minute reading " + rule.flowAbove + " above " + rule.flowBelow +
+      " all hold");
+    return rule;
+  }
+  var SIG = arrowRule(META.signal || {}, "green_arrow", "green arrow", "\u25b2", "belowBar");
+  var RED = arrowRule(META.redSignal || {}, "red_arrow", "red arrow", "\u25bc", "aboveBar");
+  var RULES = [SIG, RED];
+
+  /* ---- the Method list's recipe cells ------------------------------------------------
+     The Method prose is static, but every value in it that the recipe owns is a cell:
+     each arrow's three pairs, its four thresholds, its two words and the side of the
+     change threshold it reads, plus the chart window. The ids are built from one prefix per
+     rule -- 'm' for the green rule and 'r' for the red one -- from the same rule objects the
+     flags are computed from, so a bullet cannot print a value the rule does not use.
+     They are filled from the payload's own [signal] and [redSignal] blocks -- the same
+     numbers the arrows and the CSV's flags are decided from -- so editing the recipe cannot
+     leave the sheet describing a rule it is no longer running. `signalMethodCells` is pure (it returns the
+     id -> text map and touches no DOM), which is what lets the verifier run it outside the
+     browser against a payload of its own choosing. */
+  function arrowMethodCells(rule) {
+    var pct = function (v) { return fmtScaled(v, rule.dp); };
+    var p = rule.inverted ? "r" : "m";
+    var cells = {};
+    cells[p + "-cross-pair"] = "SMA " + rule.xFast + " vs SMA " + rule.xSlow;
+    cells[p + "-cross-dir"] = rule.crossDirection;
+    cells[p + "-distance-pair"] = "SMA " + rule.from + " vs SMA " + rule.to;
+    cells[p + "-distance-window"] = pct(rule.distanceMin) + " \u2013 " + pct(rule.distanceMax);
+    cells[p + "-relation-pair"] = "SMA " + rule.fast + " vs SMA " + rule.slow;
+    cells[p + "-relation-dir"] = rule.relation;
+    cells[p + "-chg-period"] = "SMA " + rule.slow;
+    cells[p + "-chg-min"] = pct(rule.chgMin);
+    cells[p + "-chg-side"] = rule.chgAbove ? "above" : "below";
+    cells[p + "-minus-period"] = "SMA " + rule.fast;
+    cells[p + "-minus-run"] = rule.streakMinusMin + " to " + rule.streakMinusMax;
+    cells[p + "-minus-dir"] = rule.fastRun === "plus" ? "rising" : "falling";
+    cells[p + "-plus-period"] = "SMA " + rule.slow;
+    cells[p + "-plus-run"] = rule.streakPlusMin + " or more";
+    cells[p + "-plus-dir"] = rule.slowRun === "minus" ? "falling" : "rising";
+    cells[p + "-flow-above"] = rule.flowAbove;
+    cells[p + "-flow-below"] = rule.flowBelow;
+    cells[p + "-off"] = rule.on ? "" : "Off in this recipe \u2014 the column still ships, " +
+      "always 0, and no arrow is drawn. ";
+    return cells;
+  }
+
+  function signalMethodCells() {
+    var cells = { "m-window": String(WINDOW_BARS), "m-window-tail": String(WINDOW_BARS) };
+    RULES.forEach(function (rule) {
+      var ruleCells = arrowMethodCells(rule);
+      Object.keys(ruleCells).forEach(function (id) { cells[id] = ruleCells[id]; });
+    });
+    return cells;
+  }
+
+  function renderMethod() {
+    var cells = signalMethodCells();
+    Object.keys(cells).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) { el.textContent = cells[id]; }
+    });
+  }
+  var AN_FALLBACK = ["#58a6ff", "#f0b90b", "#a371f7", "#26a69a"];
+  var PCT_DP = META.pctDecimals || 4;
+  var PRICE_PANE = 0;
+  /* how many candles a timeframe opens on: the recipe's [sheet] window_bars */
+  var WINDOW_BARS = Math.max(2, META.windowBars || 100);
+  var C = { up: "#26a69a", down: "#ef5350", accent: "#58a6ff" };
+  var BLANK = "\u2014";
+
+  /* The candle ledger above this many bars is built on demand rather than at boot.
+     The analytics table is the deliverable and is always built; this is the extra
+     OHLC appendix. Nothing is truncated -- the whole table is one click away. */
+  var LEDGER_EAGER_LIMIT = 500;
+
+  /* Every session in the payload carries the SAME timeframe set, so the timeframe tabs
+     never change meaning: the day strip only swaps the data behind them. */
+  var DAYS = DATA.days || [];
+  var TFS = (META.timeframes || [12, 36, 60, 180, 300])
+    .filter(function (s) { return DAYS.length && !!DAYS[0].timeframes[String(s)]; });
+  var DAY_BY = {};
+  DAYS.forEach(function (d) { DAY_BY[d.date] = d; });
+  var activeDay = DAYS.length ? DAYS[0].date : "";
+
+  function dayMeta() { return DAY_BY[activeDay].session; }
+  function keyOf(day, tf) { return day.replace(/-/g, "") + "-" + tf; }
+  function frameOf(day, tf) { return frames[keyOf(day, tf)]; }
+  function curFrame() { return frameOf(activeDay, active); }
+  function idOf(prefix, f) { return prefix + "-" + f.key; }
+
+  /* The bars for a day are only turned into frames the first time that day is opened,
+     so a three-session payload costs one session's worth of work to start. */
+  function ensureDay(day) {
+    var entry = DAY_BY[day];
+    if (!entry || entry.built) { return entry; }
+    entry.built = true;
+    TFS.forEach(function (tf) {
+      var src = entry.timeframes[String(tf)];
+      var byTime = {};
+      src.bars.forEach(function (b, i) { b._i = i; byTime[b.time] = b; });
+      var f = {
+        key: keyOf(day, tf), day: day, tf: tf,
+        label: src.label, short: src.short, slug: src.slug,
+        bars: src.bars, byTime: byTime, stats: src.stats,
+        cents: src.bars.map(function (b) { return toCents(b.close); }),
+        smas: {}, an: {}, lastSMA: {},
+        chart: null, candle: null, lines: {},
+        anCells: null, anBuilt: false, anMs: null, anQueued: false,
+        tableBuilt: false, ledgerOpen: false,
+        built: false, userZoomed: false, fitQueued: false
+      };
+      frames[f.key] = f;
+      recomputePrice(f);
+      recomputeAnalytics(f);
+    });
+    buildDayMarkup(day);
+    return entry;
+  }
+
+  /* ================= formatting ================= */
+
+  function pad(n, w) { n = String(n); while (n.length < (w || 2)) { n = "0" + n; } return n; }
+  function toDate(e) { return new Date((e + IST) * 1000); }
+  function hhmm(e) { var d = toDate(e); return pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()); }
+  function hhmmss(e) { return hhmm(e) + ":" + pad(toDate(e).getUTCSeconds()); }
+  function ymd(e) { var d = toDate(e); return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()); }
+  function num(v, d) {
+    if (v === null || v === undefined) { return BLANK; }
+    var dp = (d === undefined) ? 2 : d;
+    return Number(v).toLocaleString("en-IN", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  }
+  function signed(v, d) { return (v === null || v === undefined) ? BLANK : (v > 0 ? "+" : "") + num(v, d); }
+  function pctStr(v) { return (v === null || v === undefined) ? BLANK : (v > 0 ? "+" : "") + v.toFixed(3) + "%"; }
+  function dir(v) { return (v === null || v === undefined || v === 0) ? "flat" : (v > 0 ? "up" : "down"); }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c];
+    });
+  }
+  function round2(v) { return Math.round(v * 100) / 100; }
+
+  /* Matches Python's '{:+.2f}' exactly, including the '+0.00' that a zero change gets
+     (so Export CSV is byte-identical to the pipeline's CSV). */
+  function fmtSigned(v, dp) {
+    if (v === null || v === undefined) { return ""; }
+    var vv = v + 0; // normalise -0 to 0, as build_charts.r2 does
+    return (vv >= 0 ? "+" : "") + vv.toFixed(dp);
+  }
+
+  /* Percentage change is a rational, and a decimal tie would otherwise round one way
+     in Python and the other here. Format the SCALED INTEGER instead of a float: the
+     value is an exact decimal at PCT_DP places, so this is byte-identical to the
+     pipeline's f"{x:.{PCT_DP}f}" with no floating-point formatting in the path. */
+  function fmtScaled(scaled, dp) {
+    var neg = scaled < 0, abs = Math.abs(scaled), s = String(abs);
+    while (s.length < dp + 1) { s = "0" + s; }
+    var whole = s.slice(0, s.length - dp), frac = dp ? s.slice(s.length - dp) : "";
+    return (neg ? "-" : "") + whole + (dp ? "." + frac : "");
+  }
+
+  /* ============ SMA + analytics math (mirrors build_charts.py exactly) ============
+     All of it runs in integer paise. A floating mean is not usable: with period 2 the
+     average lands exactly on a half-paise boundary whenever the two closes differ by an
+     odd number of paise, so float error would decide the result and the browser could
+     disagree with the CSV. Integer arithmetic is deterministic. */
+
+  function toCents(p) { return Math.round(p * 100); }
+
+  function divHalfUp(n, d) {
+    // round(n/d) halves away from zero; floor((2n+d)/(2d)) == Python's // form
+    if (n >= 0) { return Math.floor((2 * n + d) / (2 * d)); }
+    return -Math.floor((-2 * n + d) / (2 * d));
+  }
+
+  function smaFromCents(cents, period) {
+    var out = new Array(cents.length), sum = 0, i;
+    for (i = 0; i < cents.length; i++) {
+      sum += cents[i];
+      if (i >= period) { sum -= cents[i - period]; }
+      out[i] = (i >= period - 1) ? divHalfUp(sum, period) / 100 : null;
+    }
+    return out;
+  }
+
+  /* Per-candle percentage change plus the cumulative +/- tallies. Independent per
+     period; a zero change is neither positive nor negative. */
+  /* Percentage change plus the CONSECUTIVE run length, per period.
+
+     Run rules, independent for each period:
+       * a positive change extends the rising run and drops the falling run to 0
+       * a negative change extends the falling run and drops the rising run to 0
+       * a reversal therefore starts a new run at 1
+       * a change of exactly zero resets BOTH runs to 0
+       * a blank change (no previous average yet) leaves both at 0
+
+     These are streak lengths, not running totals: a fresh rise after a fall reads
+     +1 / 0, never +n / m. */
+  function analyticsFromCents(cents, period) {
+    var series = smaFromCents(cents, period);
+    var scale = 100 * Math.pow(10, PCT_DP), pow = Math.pow(10, PCT_DP);
+    var smaCents = series.map(function (v) { return v === null ? null : Math.round(v * 100); });
+    var n = cents.length, chg = new Array(n), chgScaled = new Array(n),
+        plus = new Array(n), minus = new Array(n);
+    var p = 0, m = 0, i, cur, prev, scaled;
+    for (i = 0; i < n; i++) {
+      cur = smaCents[i];
+      prev = i > 0 ? smaCents[i - 1] : null;
+      if (cur === null || prev === null || prev === 0) {
+        chg[i] = null; chgScaled[i] = null;
+      } else {
+        scaled = divHalfUp((cur - prev) * scale, prev);
+        chgScaled[i] = scaled;
+        chg[i] = scaled / pow;
+        if (scaled > 0) { p += 1; m = 0; }
+        else if (scaled < 0) { m += 1; p = 0; }
+        else { p = 0; m = 0; }
+      }
+      plus[i] = p; minus[i] = m;
+    }
+    var points = [];
+    for (i = 0; i < n; i++) { if (chg[i] !== null) { points.push({ i: i, value: chg[i] }); } }
+    return { period: period, series: series, smaCents: smaCents, chg: chg,
+             chgScaled: chgScaled, plus: plus, minus: minus, points: points,
+             last: chg[n - 1], lastPlus: p, lastMinus: m };
+  }
+
+  function countLabel(plus, minus) { return "+" + plus + " / \u2212" + minus; }
+
+  /* SMA <fast> vs SMA <slow> DIRECTION STREAK -- one row, two mutually exclusive runs.
+
+       ABOVE  -- SMA fast > SMA slow AND the SMA slow change is positive
+       BELOW  -- SMA fast < SMA slow AND the SMA slow change is negative
+       neither -- both runs drop to 0, so a switch from BELOW to ABOVE (or back) starts
+                 the new run at 1 and a candle fitting no rule resets the row
+
+     The change is read from the slow average's own chgScaled -- the rounded 4-decimal
+     value printed in the 'SMA n Change (%)' row above -- so a move that rounds to 0.0000
+     counts as neither, exactly as it does for the consecutive counts. Only one side can
+     ever be non-zero, so the row reads +n / \u22120 or +0 / \u2212n, or +0 / \u22120 after a reset. */
+  function directionFromAnalytics(fast, slow) {
+    var n = fast.smaCents.length;
+    var above = new Array(n), below = new Array(n);
+    var a = 0, b = 0, i, fc, sc, chg;
+    for (i = 0; i < n; i++) {
+      fc = fast.smaCents[i]; sc = slow.smaCents[i]; chg = slow.chgScaled[i];
+      if (fc === null || fc === undefined || sc === null || sc === undefined ||
+          chg === null || chg === undefined) {
+        a = 0; b = 0;                    // no comparison available yet: nothing to count
+      } else if (fc > sc && chg > 0) {
+        a += 1; b = 0;
+      } else if (fc < sc && chg < 0) {
+        b += 1; a = 0;
+      } else {
+        a = 0; b = 0;                    // equality, or a change of exactly zero
+      }
+      above[i] = a; below[i] = b;
+    }
+    return { above: above, below: below, lastAbove: a, lastBelow: b,
+             maxAbove: Math.max.apply(null, above), maxBelow: Math.max.apply(null, below) };
+  }
+
+  /* SMA <fast> vs SMA <slow> CROSS DIRECTION, and the distance it carries -- two rows.
+
+       ABOVE   -- the fast average was below the slow one on the previous candle and is
+                  above it on this one
+       BELOW   -- the fast average was above the slow one and is below it now
+       blank   -- no strict crossing: the pair stayed on the same side, the two averages
+                  were equal on either candle, or one of them does not exist yet. The
+                  first candle of a session has no previous candle, so it carries none.
+
+     The crossing is decided by comparing THIS candle with the PREVIOUS one, never by the
+     current relationship alone. On a crossing candle the two distance rows read that same
+     candle's averages: (SMA from - SMA to) / SMA to * 100, and the supplementary (SMA
+     fast - SMA slow) / SMA slow * 100. Both are computed as SCALED INTEGERS with the same
+     half-up rounding as every other percentage here, so the browser's CSV is byte-identical
+     to the pipeline's. A missing or zero divisor leaves the field empty; nothing reads a
+     later bar. */
+  function crossFromSmas(fast, slow, from, to) {
+    var n = fast.smaCents.length, scale = Math.pow(10, PCT_DP);
+    var dir = new Array(n), dist = new Array(n), pair = new Array(n);
+    var i, fc, sc, pf, ps, fv, tv;
+    for (i = 0; i < n; i++) {
+      dir[i] = null; dist[i] = null; pair[i] = null;
+      fc = fast.smaCents[i]; sc = slow.smaCents[i];
+      pf = i > 0 ? fast.smaCents[i - 1] : null;
+      ps = i > 0 ? slow.smaCents[i - 1] : null;
+      if (fc === null || sc === null || pf === null || ps === null) { continue; }
+      if (pf < ps && fc > sc) { dir[i] = "ABOVE"; }
+      else if (pf > ps && fc < sc) { dir[i] = "BELOW"; }
+      else { continue; }                       // same side, or an equal pair: no crossing
+      fv = from.smaCents[i]; tv = to.smaCents[i];
+      if (fv !== null && fv !== undefined && tv !== null && tv !== undefined && tv !== 0) {
+        dist[i] = divHalfUp((fv - tv) * 100 * scale, tv);
+      }
+      if (sc !== 0) { pair[i] = divHalfUp((fc - sc) * 100 * scale, sc); }
+    }
+    var above = 0, below = 0, withDistance = 0, lastIndex = null, lo = null, hi = null;
+    for (i = 0; i < n; i++) {
+      if (dir[i] === "ABOVE") { above += 1; lastIndex = i; }
+      else if (dir[i] === "BELOW") { below += 1; lastIndex = i; }
+      if (dist[i] !== null) {
+        withDistance += 1;
+        lo = (lo === null) ? dist[i] : Math.min(lo, dist[i]);
+        hi = (hi === null) ? dist[i] : Math.max(hi, dist[i]);
+      }
+    }
+    return { dir: dir, dist: dist, pair: pair, above: above, below: below,
+             crossings: above + below, withDistance: withDistance,
+             lastIndex: lastIndex, min: lo, max: hi,
+             distanceCount: withDistance };
+  }
+
+  /* SMA <fast> vs SMA <slow> ABOVE / BELOW -- the CURRENT relationship, one word per
+     candle: which side of each other the two averages sit on.
+
+       ABOVE -- SMA fast > SMA slow on this candle
+       BELOW -- SMA fast < SMA slow on this candle
+       blank -- the two are equal (a tie belongs to neither side), or the slow average
+                does not exist yet, which is every candle before its period
+
+     Read from this candle's own two averages, with no previous candle involved, so the
+     word holds on every candle both averages exist. It is the relationship, not a change
+     of side: the crossing row above answers the different question of when the pair
+     swapped, and is blank on almost every candle this row carries a word on. */
+  function relationFromSmas(fast, slow) {
+    var n = fast.smaCents.length, words = new Array(n);
+    var above = 0, below = 0, last = null, lastIndex = null, i, fc, sc;
+    for (i = 0; i < n; i++) {
+      fc = fast.smaCents[i]; sc = slow.smaCents[i];
+      if (fc === null || fc === undefined || sc === null || sc === undefined || fc === sc) {
+        words[i] = null;                  // a tie, or an average that does not exist yet
+      } else if (fc > sc) {
+        words[i] = "ABOVE"; above += 1;
+      } else {
+        words[i] = "BELOW"; below += 1;
+      }
+      if (words[i] !== null) { last = words[i]; lastIndex = i; }
+    }
+    return { words: words, last: last, lastIndex: lastIndex, above: above, below: below };
+  }
+
+  /* An arrow rule's flags: one integer per candle, 1 where all seven conditions hold.
+
+     The crossing and relationship rows are read from the frame's own arrays when the rule
+     names the same averages those rows use (which the baked recipe does), and computed
+     from the same functions otherwise -- so there is one implementation of each row and
+     no second set of numbers can appear. The three previous-candle conditions read the
+     candle at i - 1 and never a later one, so the flag can never see the future, and the
+     session's first candle can never fire: it has no predecessor. */
+  function crossRowFor(f, fast, slow, from, to) {
+    if (fast === X_FAST && slow === X_SLOW && from === X_FROM && to === X_TO) { return f.cross; }
+    return crossFromSmas(analyticsFor(f, fast), analyticsFor(f, slow),
+                         analyticsFor(f, from), analyticsFor(f, to));
+  }
+
+  function relationRowFor(f, fast, slow) {
+    if (fast === R_FAST && slow === R_SLOW) { return f.rel; }
+    return relationFromSmas(analyticsFor(f, fast), analyticsFor(f, slow));
+  }
+
+  /* One rule's flags over one frame, read from the rows the steps above it produced. Two
+     things differ between the green rule and its mirror, and both arrive as data: which of
+     the two runs on the previous candle is counted, and which side of the change threshold
+     counts. Everything else -- the columns, the words, the window, the run lengths -- is
+     the rule's own field, so this function is the whole of the sheet's rule engine for
+     both arrows. */
+  function ruleFlags(f, rule) {
+    var n = f.bars.length, flags = new Array(n);
+    var cross = crossRowFor(f, rule.xFast, rule.xSlow, rule.from, rule.to);
+    var rel = relationRowFor(f, rule.fast, rule.slow);
+    var fastAn = f.an[rule.fast] || analyticsFor(f, rule.fast);
+    var slowAn = f.an[rule.slow] || analyticsFor(f, rule.slow);
+    /* one tally per condition, keyed by the analytics-table row it reads: the same six
+       keys the summary's perCondition block carries, so the sheet's count and the
+       pipeline's count are the same numbers under the same names */
+    var per = { cross_direction: 0, distance_pct_at_cross: 0, relation: 0, flow: 0,
+                chg_pct: 0, streak_minus: 0, streak_plus: 0 };
+    /* the run this rule counts, and the opposite one it requires to be zero: a candle in a
+       rising run carries no falling run, so the pair is always one count and one zero */
+    var fastCounted = fastAn[rule.fastRun] || [];
+    var fastZero = fastAn[rule.fastRun === "plus" ? "minus" : "plus"] || [];
+    var slowCounted = slowAn[rule.slowRun] || [];
+    var arrows = 0, firstIndex = null, lastIndex = null, i;
+    for (i = 0; i < n; i++) {
+      var d = cross.dist[i];
+      var prevChg = (i > 0) ? slowAn.chgScaled[i - 1] : null;
+      var prevCounted = (i > 0) ? fastCounted[i - 1] : null;
+      var prevZero = (i > 0) ? fastZero[i - 1] : null;
+      var prevSlowRun = (i > 0) ? slowCounted[i - 1] : null;
+      var c1 = cross.dir[i] === rule.crossDirection;
+      var c2 = (d !== null && d !== undefined) &&
+               d >= rule.distanceMin && d <= rule.distanceMax;
+      var c3 = rel.words[i] === rule.relation;
+      /* the dashboard's minute this candle opens in: the pair travels on the bar itself.
+         A null on either side means the session ships no dashboard (or no row for that
+         minute), and the condition is then not read rather than read as a zero. */
+      var flowAbove = f.bars[i][rule.flowAbove];
+      var flowBelow = f.bars[i][rule.flowBelow];
+      var cFlow = !rule.useFlow || flowAbove === null || flowAbove === undefined ||
+                  flowBelow === null || flowBelow === undefined || flowAbove > flowBelow;
+      var c4 = (prevChg !== null && prevChg !== undefined) &&
+               (rule.chgAbove ? prevChg > rule.chgMin : prevChg < rule.chgMin);
+      var c5 = (prevCounted !== null && prevCounted !== undefined) && !prevZero &&
+               prevCounted >= rule.streakMinusMin && prevCounted <= rule.streakMinusMax;
+      var c6 = (prevSlowRun !== null && prevSlowRun !== undefined) &&
+               prevSlowRun >= rule.streakPlusMin;
+      if (c1) { per.cross_direction += 1; }
+      if (c2) { per.distance_pct_at_cross += 1; }
+      if (c3) { per.relation += 1; }
+      if (cFlow) { per.flow += 1; }
+      if (c4) { per.chg_pct += 1; }
+      if (c5) { per.streak_minus += 1; }
+      if (c6) { per.streak_plus += 1; }
+      flags[i] = (rule.on && c1 && c2 && c3 && cFlow && c4 && c5 && c6) ? 1 : 0;
+      if (flags[i]) {
+        arrows += 1;
+        lastIndex = i;
+        if (firstIndex === null) { firstIndex = i; }
+      }
+    }
+    return { flags: flags, arrows: arrows, firstIndex: firstIndex, lastIndex: lastIndex,
+             per: per, column: rule.column, enabled: rule.on };
+  }
+
+  /* every rule's flags for one frame, keyed by the rule's own column, so callers never
+     need to know how many rules there are */
+  function frameFlags(f) {
+    var sigs = {};
+    RULES.forEach(function (rule) { sigs[rule.column] = ruleFlags(f, rule); });
+    return sigs;
+  }
+
+  function flagsOf(f, rule) {
+    return (f.sigs && f.sigs[rule.column]) || { flags: [], arrows: 0, per: {} };
+  }
+
+  /* one rule as the sheet's JSON export carries it: the same fields the payload arrived
+     with, plus the marker this sheet draws for it, so a consumer of the export can read
+     back both the rule and how it was rendered */
+  function signalJson(rule) {
+    return { enabled: rule.on, column: rule.column,
+             crossFastPeriod: rule.xFast, crossSlowPeriod: rule.xSlow,
+             distanceFromPeriod: rule.from, distanceToPeriod: rule.to,
+             fastPeriod: rule.fast, slowPeriod: rule.slow,
+             crossDirection: rule.crossDirection, relation: rule.relation,
+             distancePctAtCrossMinScaled: rule.distanceMin,
+             distancePctAtCrossMaxScaled: rule.distanceMax,
+             chgPctMinScaled: rule.chgMin, chgAbove: rule.chgAbove,
+             streakMinusMin: rule.streakMinusMin, streakMinusMax: rule.streakMinusMax,
+             streakPlusMin: rule.streakPlusMin,
+             fastRun: rule.fastRun, slowRun: rule.slowRun, inverted: rule.inverted,
+             flowAbove: rule.flowAbove, flowBelow: rule.flowBelow, useFlow: rule.useFlow,
+             marker: { position: rule.position, shape: arrowShape(rule),
+                       color: arrowColor(rule), mark: rule.mark },
+             rule: rule.rule };
+  }
+
+  /* the presentation half of a rule: which side of the bar, which colour, which mark and
+     which table class. All four follow the rule's own direction, so a third direction
+     would need no new code here -- only a payload. */
+  function arrowSide(rule) { return rule.inverted ? "above" : "below"; }
+  function arrowColor(rule) { return rule.inverted ? C.down : C.up; }
+  function arrowShape(rule) { return rule.inverted ? "arrowDown" : "arrowUp"; }
+  function arrowClass(rule) { return rule.inverted ? "down" : "up"; }
+  function ruleTitle(rule) {
+    return rule.label.charAt(0).toUpperCase() + rule.label.slice(1);
+  }
+
+  function analyticsFor(f, period) {
+    /* the crossing row may name an average the analytics set does not carry; compute it
+       on demand rather than recursing back into recomputeAnalytics */
+    return f.an[period] || analyticsFromCents(f.cents, period);
+  }
+
+  /* ================= state ================= */
+
+  var active = TFS[0];
+  var frames = {};   /* keyed by keyOf(day, tf) -- see ensureDay() */
+
+  /* price-pane averages: these follow the toolbar inputs */
+  function recomputePrice(f) {
+    PRICE_DEFS.forEach(function (def) {
+      var series = smaFromCents(f.cents, def.period);
+      f.smas[def.id] = series;
+      var pts = [];
+      series.forEach(function (v, i) { if (v !== null) { pts.push({ time: f.bars[i].time, value: v }); } });
+      f.smas[def.id + "Points"] = pts;
+      f.lastSMA[def.id] = series[series.length - 1];
+    });
+  }
+
+  /* indicator analytics: pinned to ANALYTICS_PERIODS, never to the toolbar */
+  function recomputeAnalytics(f) {
+    ANALYTICS_PERIODS.forEach(function (p) {
+      var a = analyticsFromCents(f.cents, p);
+      a.points = a.points.map(function (pt) {
+        return { time: f.bars[pt.i].time, value: pt.value };
+      });
+      f.an[p] = a;
+    });
+    // the direction row spans two averages, so it is computed once both exist
+    var fast = f.an[DIR_FAST] || f.an[ANALYTICS_PERIODS[0]];
+    var slow = f.an[DIR_SLOW] || f.an[ANALYTICS_PERIODS[1]] || fast;
+    f.dir = directionFromAnalytics(fast, slow);
+    // the crossing rows span two pairs of averages, so they are computed once all four
+    // series exist; both distance periods are in the payload's analytics set
+    f.cross = crossFromSmas(analyticsFor(f, X_FAST), analyticsFor(f, X_SLOW),
+                            analyticsFor(f, X_FROM), analyticsFor(f, X_TO));
+    // the relationship row spans two averages of its own
+    f.rel = relationFromSmas(analyticsFor(f, R_FAST), analyticsFor(f, R_SLOW));
+    // both arrow rules read those rows, so they are computed once they all exist
+    f.sigs = frameFlags(f);
+  }
+
+  function colorFor(period, index) {
+    return AN_COLOR[period] || AN_FALLBACK[index % AN_FALLBACK.length];
+  }
+
+  function anOf(f, period) {
+    if (!f.an[period]) { recomputeAnalytics(f); }
+    return f.an[period];
+  }
+
+  /* ================= masthead + KPIs =================
+     The masthead, the KPI cards and the comparison matrix all describe the ACTIVE
+     session, so they are re-rendered whenever the day strip changes. */
+
+  var TF_TEXT = TFS.map(function (tf) { return DAYS[0].timeframes[String(tf)].short; })
+    .join(" / ");
+  var PRICE_TEXT = PRICE_DEFS.map(function (d) { return d.period; }).join("/");
+  var AN_TEXT = ANALYTICS_PERIODS.join(" & ");
+
+  function renderDayHeader() {
+    var S = dayMeta();
+    var dayFrames = TFS.map(function (tf) { return frameOf(activeDay, tf); });
+    /* this session's arrows, per rule: the masthead, the KPI cards and the matrix all read
+       the same numbers, and each is the sum over the five timeframes */
+    var dayArrows = {};
+    RULES.forEach(function (rule) {
+      dayArrows[rule.column] = dayFrames.reduce(function (a, f) {
+        return a + flagsOf(f, rule).arrows;
+      }, 0);
+    });
+    document.getElementById("title").innerHTML =
+      esc(META.instrument) + '<span class="dot">/</span>' + esc(TF_TEXT) +
+      ' &middot; SMA ' + esc(AN_TEXT) + ' analytics';
+    document.getElementById("subtitle").innerHTML =
+      "Session <b>" + esc(S.dateIST) + "</b>" +
+      (DAYS.length > 1 ? " of " + DAYS.length + " (" + esc(DAYS[0].date) + " \u2192 " +
+        esc(DAYS[DAYS.length - 1].date) + ")" : "") +
+      " &middot; IST " + esc(S.sessionStartIST.slice(11)) +
+      " \u2192 " + esc(S.sessionEndIST.slice(11)) + " &middot; resampled from <code>1-second</code> ticks into <code>" +
+      esc(TF_TEXT) + "</code> OHLC bars";
+    document.getElementById("stamp").innerHTML =
+      "<b>Session</b> " + esc(S.dateIST) + "<br>" +
+      "<b>Source</b> " + esc(S.source) + "<br>" +
+      "<b>Ticks</b> " + num(S.ticks, 0) + " &middot; <b>Coverage</b> " + S.coveragePct + "%<br>" +
+      "<b>Chart engine</b> TradingView Lightweight Charts (Apache-2.0)<br>" +
+      "<b>Indicator</b> SMA " + esc(AN_TEXT) + " change % &middot; " + RULES.length +
+      " marker rules<br>" +
+      RULES.map(function (rule) {
+        return "<b>" + esc(ruleTitle(rule)) + "</b> " + (rule.on
+          ? "<b>" + num(dayArrows[rule.column], 0) + "</b> on this session's five timeframes"
+          : "off in this recipe");
+      }).join("<br>");
+    document.getElementById("foot").textContent =
+      "Generated " + new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC  \u00b7  " +
+      DAYS.length + " session" + (DAYS.length === 1 ? "" : "s") + "  \u00b7  " + S.ticks +
+      " ticks this session  \u00b7  " + TFS.length + " timeframes  \u00b7  price SMA " + PRICE_TEXT +
+      "  \u00b7  indicator SMA " + AN_TEXT;
+    document.getElementById("daysrc").textContent = S.source;
+
+    var KPI = [
+      ["Instrument", esc(META.instrument), "spot index \u00b7 " + esc(S.dateIST), ""],
+      ["Session (IST)", S.sessionStartIST.slice(11) + "\u2013" + S.sessionEndIST.slice(11), S.dateIST, ""],
+      ["Ticks ingested", num(S.ticks, 0), S.secondsMissing + " s missing \u00b7 " + S.coveragePct + "%", ""],
+      ["Timeframes", TFS.length, TFS.map(function (tf) { return DAYS[0].timeframes[String(tf)].short; }).join(" \u00b7 "), ""],
+      ["Day open", num(S.dayOpen), "", ""],
+      ["Day high", num(S.dayHigh), "", ""],
+      ["Day low", num(S.dayLow), "", ""],
+      ["Day close", num(S.dayClose), "", ""],
+      ["Net change", signed(S.dayChangePts) + "  (" + pctStr(S.dayChangePct) + ")", "open \u2192 close", dir(S.dayChangePts)],
+      ["Session range", num(S.dayHigh - S.dayLow), "high \u2212 low", ""],
+      ["Price-pane SMA", PRICE_TEXT, "editable", ""],
+      ["Indicator table", "SMA " + AN_TEXT, "change % \u00b7 pinned to the recipe", ""],
+      ["Chart window", WINDOW_BARS + " candles", "opens on the latest \u00b7 scroll for the rest", ""]
+    ].concat(RULES.map(function (rule) {
+      /* one row per arrow rule, in rule order, so the card always counts what is drawn */
+      return [ruleTitle(rule), rule.on ? num(dayArrows[rule.column], 0) : "off",
+        "6-condition AND rule \u00b7 arrows " + arrowSide(rule) + " the bars",
+        rule.on && dayArrows[rule.column] ? arrowClass(rule) : ""];
+    })).concat([
+      ["ATM strikes", num(S.atmStrikes.length, 0), num(S.atmStrikes[0], 0) + "\u2013" + num(S.atmStrikes[S.atmStrikes.length - 1], 0), ""]
+    ]);
+    document.getElementById("kpis").innerHTML = KPI.map(function (r) {
+      return '<div class="kpi"><div class="k">' + r[0] + '</div>' +
+        '<div class="v ' + r[3] + '">' + r[1] + '</div>' +
+        '<div class="n">' + (r[2] || "&nbsp;") + '</div></div>';
+    }).join("");
+    return dayFrames;
+  }
+
+  /* ================= day strip, tabs + panels ================= */
+
+  function renderDayTabs() {
+    document.getElementById("daytabs").innerHTML = DAYS.map(function (d) {
+      var S = d.session, on = d.date === activeDay;
+      return '<button class="dtab" role="tab" id="dt-' + d.date + '" data-day="' + d.date + '" ' +
+        'aria-selected="' + on + '" tabindex="' + (on ? 0 : -1) + '">' + esc(d.date) +
+        ' <span class="badge ' + dir(S.dayChangePts) + '">' + signed(S.dayChangePts) + ' pts \u00b7 ' +
+        pctStr(S.dayChangePct) + '</span></button>';
+    }).join("");
+  }
+
+  function renderTabs() {
+    document.querySelector("nav.tabs").innerHTML = TFS.map(function (tf, i) {
+      var f = frameOf(activeDay, tf);
+      return '<button class="tab" id="tab-' + tf + '" role="tab" data-tf="' + tf + '" ' +
+        'aria-controls="panel-' + f.key + '" aria-selected="false" tabindex="-1">' +
+        f.short + ' <span class="badge">' + f.bars.length + ' bars</span></button>';
+    }).join("");
+  }
+
+  /* One panel per timeframe for this day; ids carry the day, so several sessions can
+     coexist in the DOM without colliding. */
+  function buildDayMarkup(day) {
+    var wrap = document.createElement("div");
+    wrap.className = "daypanels";
+    wrap.id = "dp-" + day.replace(/-/g, "");
+    wrap.dataset.day = day;
+    wrap.setAttribute("data-active", "false");
+    wrap.innerHTML = TFS.map(function (tf, i) {
+      var f = frameOf(day, tf);
+      return '<article class="panel" id="panel-' + f.key + '" role="tabpanel" data-day="' + day +
+        '" data-tf="' + tf + '" data-key="' + f.key + '" aria-labelledby="tab-' + tf + '" data-active="false">' +
+        '<div class="panel-inner">' +
+        '<div class="panel-head"><h3><span class="idx">PANEL ' + (i + 1) + '</span>' +
+          esc(f.label) + ' bars <span class="meta">' + esc(day) + '</span></h3>' +
+        '<div class="chips" id="chips-' + f.key + '"></div></div>' +
+        '<div class="chart-wrap">' +
+          '<div class="chart-legend" id="legend-' + f.key + '"></div>' +
+          '<div class="cursor-badge" id="badge-' + f.key + '" data-on="false" aria-hidden="true"></div>' +
+          '<div class="chart" id="chart-' + f.key + '"></div>' +
+        '</div>' +
+        /* the analytics table sits directly under the chart, so a row and the candle it
+           describes are read together instead of out of a pane */
+        '<div class="ind-block" id="ind-' + f.key + '">' +
+          '<header>' +
+            '<h4><span class="tag2">TABLE</span> Indicator &middot; SMA ' + esc(AN_TEXT) +
+            ' change (%) &middot; SMA ' + DIR_FAST + ' vs ' + DIR_SLOW + ' direction streak &middot; ' +
+            X_FAST + 'v' + X_SLOW + ' cross + ' + X_FROM + 'v' + X_TO + ' distance &middot; ' +
+            R_FAST + 'v' + R_SLOW + ' above / below</h4>' +
+            '<span class="meta" id="anmeta-' + f.key + '"></span>' +
+          '</header>' +
+          '<div class="an-scroll" id="an-' + f.key + '"></div>' +
+        '</div>' +
+        '<div class="table-block"><header>' +
+          '<h4>Candle ledger <span class="meta" id="tcount-' + f.key + '"></span></h4>' +
+          '<span class="meta">appendix &middot; oldest \u2192 newest</span>' +
+          '<button class="ghost" type="button" id="ltoggle-' + f.key + '"></button>' +
+        '</header><div class="table-scroll" id="tscroll-' + f.key + '"></div></div>' +
+        '</div></article>';
+    }).join("");
+    document.getElementById("panels").appendChild(wrap);
+  }
+
+  /* ================= SMA toolbar ================= */
+
+  document.getElementById("smabar").innerHTML =
+    '<span class="grp-label">Price-pane averages</span>' +
+    PRICE_DEFS.map(function (def, i) {
+      return '<label class="sma-ctl" id="smactl-' + i + '">' +
+        '<input type="checkbox" data-sma-toggle="' + i + '" checked>' +
+        '<span class="dot" style="background:' + def.color + '"></span>' +
+        'SMA <input type="number" class="sma-period" data-sma-period="' + i + '" ' +
+        'value="' + def.period + '" min="2" max="600" step="1">' +
+        '</label>';
+    }).join("") +
+    '<span class="rule" style="flex:1;height:1px"></span>' +
+    '<span class="fixed-note">indicator + table pinned to SMA ' + esc(AN_TEXT) + '</span>';
+
+  /* ================= charts ================= */
+
+  function ensureChart(f) {
+    if (f.built) { return f; }
+
+    var chart = LWC.createChart(document.getElementById(idOf("chart", f)), {
+      autoSize: true,
+      layout: {
+        background: { type: LWC.ColorType.Solid, color: "transparent" },
+        textColor: "#8b98a8",
+        fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Ubuntu,sans-serif",
+        fontSize: 11
+      },
+      grid: { vertLines: { color: "rgba(32,42,54,.55)" }, horzLines: { color: "rgba(32,42,54,.55)" } },
+      crosshair: {
+        mode: LWC.CrosshairMode.Normal,
+        vertLine: { color: C.accent, width: 1, style: LWC.LineStyle.Dashed, labelBackgroundColor: "#1f6feb" },
+        horzLine: { color: C.accent, width: 1, style: LWC.LineStyle.Dashed, labelBackgroundColor: "#1f6feb" }
+      },
+      rightPriceScale: { borderColor: "#202a36", scaleMargins: { top: 0.1, bottom: 0.1 } },
+      timeScale: {
+        borderColor: "#202a36", timeVisible: true, secondsVisible: false,
+        // the window is sized to the pane on the first paint and after a resize; a low
+        // floor lets a deliberately zoomed-out view keep the earlier bars instead of
+        // silently clipping them
+        rightOffset: 2, barSpacing: 9, minBarSpacing: 0.02,
+        tickMarkFormatter: function (time, type) {
+          // sub-minute scales need seconds on the axis to be readable
+          return (f.tf < 60 && type >= LWC.TickMarkType.Time) ? hhmmss(time) : hhmm(time);
+        }
+      },
+      localization: {
+        locale: "en-IN",
+        timeFormatter: function (time) { return ymd(time) + " " + hhmmss(time); },
+        priceFormatter: function (p) { return num(p); }
+      },
+      handleScale: { axisPressedMouseMove: { time: true, price: false } }
+    });
+
+    /* ---- pane 0: candles + the three price averages ---- */
+    f.candle = chart.addSeries(LWC.CandlestickSeries, {
+      upColor: C.up, downColor: C.down,
+      borderUpColor: C.up, borderDownColor: C.down,
+      wickUpColor: "rgba(38,166,154,.8)", wickDownColor: "rgba(239,83,80,.8)",
+      priceLineVisible: false,
+      priceFormat: { type: "price", precision: 2, minMove: 0.05 }
+    }, PRICE_PANE);
+
+    PRICE_DEFS.forEach(function (def) {
+      f.lines[def.id] = chart.addSeries(LWC.LineSeries, {
+        color: def.color,
+        lineWidth: def.period <= 2 ? 1 : 2,
+        lineStyle: LWC.LineStyle.Solid,
+        priceLineVisible: false, lastValueVisible: true,
+        crosshairMarkerVisible: true, crosshairMarkerRadius: 3.5,
+        priceFormat: { type: "price", precision: 2, minMove: 0.05 }
+      }, PRICE_PANE);
+    });
+
+    /* the chart is a single pane: one time axis under the candles. The SMA 2 / 9 / 44
+       changes are tabulated (and exported) rather than drawn on a second pane */
+    f.chart = chart;
+    f.built = true;
+
+    f.candle.setData(f.bars.map(function (b) {
+      return { time: b.time, open: b.open, high: b.high, low: b.low, close: b.close };
+    }));
+    PRICE_DEFS.forEach(function (def, i) {
+      f.lines[def.id].setData(f.smas[def.id + "Points"]);
+      f.lines[def.id].applyOptions({ visible: smaToggle(i).checked });
+    });
+    applySignalMarkers(f);
+
+    chart.subscribeCrosshairMove(function (param) {
+      var hit = param && param.time;
+      var idx = hit ? ((f.byTime[param.time] || {})._i) : -1;
+      renderLegend(f, hit ? param : null);
+      highlightRow(f, hit ? param.time : null);
+      focusColumn(f, idx);
+      showBadge(f, hit ? param : null, idx);
+    });
+
+    /* the crosshair move that ends a hover arrives without a time, but a pointer that
+       leaves the chart sideways does not always produce one: hide on leave as well */
+    var chartHost = document.getElementById(idOf("chart", f));
+    if (chartHost) {
+      chartHost.addEventListener("pointerleave", function () { hideBadge(f); });
+    }
+
+    attachAutoFit(f);
+    scheduleFit(f);
+    window.setTimeout(function () { scheduleFit(f); }, 80); // settle after first layout
+    renderLegend(f, null);
+    return f;
+  }
+
+  function smaToggle(i) { return document.querySelector('[data-sma-toggle="' + i + '"]'); }
+  function smaPeriodInput(i) { return document.querySelector('[data-sma-period="' + i + '"]'); }
+
+  /* scheduleFit / fitNow: the container width changes at unpredictable moments
+     (responsive pane, window resize, print). Refit on every such change until the
+     user grabs the chart, so a narrow first paint can never leave the bars squeezed
+     into a corner. */
+  function scheduleFit(f) {
+    if (!f || f.userZoomed || f.fitQueued) { return; }
+    f.fitQueued = true;
+    requestAnimationFrame(function () {
+      f.fitQueued = false;
+      if (f.built && !f.userZoomed) { fitNow(f); }
+    });
+  }
+
+  /* fitContent() keeps the current bar spacing, so a 76-bar timeframe would leave most
+     of the pane empty, and fitting all 1,880 bars of the 12s tape into the pane smears
+     them into a line. Size the bars to the pane, then open on the latest WINDOW_BARS
+     candles: every timeframe starts at the same readable scale and the earlier bars are
+     one drag to the right. Nothing is truncated -- this is the visible range only, and
+     the arrows, the table and both exports still cover the whole session. */
+  function fitNow(f) {
+    if (!f.built) { return; }
+    var host = document.getElementById(idOf("chart", f));
+    var w = (host && host.clientWidth) || 0;
+    var n = f.bars.length;
+    if (w < 80 || n < 2) { f.chart.timeScale().fitContent(); return; }
+
+    var shown = Math.min(n, WINDOW_BARS);
+    // the price axis is not drawing space, so subtract it or the bars underfill
+    var axis = 0;
+    try { axis = f.chart.priceScale("right").width() || 0; } catch (err) { axis = 0; }
+    if (!axis) { axis = 62; } // before the first paint the axis width is unknown
+
+    var drawable = Math.max(40, w - axis);
+    var spacing = Math.max(0.02, Math.min(60, drawable / (shown + 2)));
+    f.chart.applyOptions({ timeScale: { barSpacing: spacing } });
+    f.chart.timeScale().setVisibleLogicalRange({ from: n - shown - 0.5, to: n - 0.5 });
+  }
+
+  function attachAutoFit(f) {
+    var host = document.getElementById(idOf("chart", f));
+    if (typeof ResizeObserver !== "undefined") {
+      f.ro = new ResizeObserver(function () { scheduleFit(f); });
+      f.ro.observe(host);
+    }
+    host.addEventListener("wheel", function () { f.userZoomed = true; }, { passive: true });
+    host.addEventListener("pointerdown", function () { f.userZoomed = true; });
+    host.addEventListener("dblclick", function () { f.userZoomed = false; scheduleFit(f); });
+  }
+
+  /* Both arrow rules' markers: one per firing candle, the green ones below the bar and the
+     red ones above it, each in its own rule's colour and shape. The marker primitive is
+     created once per (session, timeframe) and then updated, so switching between timeframes
+     never rebuilds it, and a candle with no flag simply gets no marker rather than a
+     transparent one. Markers are emitted in candle order because the engine requires it,
+     which is why the rules are looped inside the candle loop rather than beside it. */
+  function applySignalMarkers(f) {
+    if (!f.candle) { return; }
+    var markers = [];
+    for (var i = 0; i < f.bars.length; i++) {
+      for (var k = 0; k < RULES.length; k++) {
+        var rule = RULES[k];
+        if (flagsOf(f, rule).flags[i]) {
+          markers.push({ time: f.bars[i].time, position: rule.position,
+                         color: arrowColor(rule), shape: arrowShape(rule), text: "" });
+        }
+      }
+    }
+    try {
+      if (!f.arrowMarkers && LWC.createSeriesMarkers) {
+        f.arrowMarkers = LWC.createSeriesMarkers(f.candle, markers);
+      } else if (f.arrowMarkers && f.arrowMarkers.setMarkers) {
+        f.arrowMarkers.setMarkers(markers);
+      }
+    } catch (err) {
+      /* an engine without the marker primitive: the counts, the badge and both exports
+         still carry the same rules and the same candles */
+    }
+  }
+
+  /* ================= legend ================= */
+
+  function cell(label, value, cls, swatch) {
+    return '<span>' + (swatch ? '<span class="swatch" style="background:' + swatch + '"></span>' : '') +
+      '<span class="lg-k">' + label + '</span> <span class="lg-v ' + (cls || "") + '">' + value + '</span></span>';
+  }
+
+  function renderLegend(f, param) {
+    var bar = null, idx = null, smaVals = {};
+
+    if (param && param.seriesData && param.seriesData.get(f.candle)) {
+      var sd = param.seriesData.get(f.candle);
+      var bt = f.byTime[param.time] || null;
+      idx = bt ? bt._i : -1;
+      bar = {
+        time: param.time, open: sd.open, high: sd.high, low: sd.low, close: sd.close,
+        atm: bt ? bt.atm : null, ticks: bt ? bt.ticks : null, _i: idx
+      };
+      PRICE_DEFS.forEach(function (def) {
+        var lv = param.seriesData.get(f.lines[def.id]);
+        smaVals[def.id] = (lv && typeof lv.value === "number") ? lv.value
+          : (idx >= 0 ? f.smas[def.id][idx] : null);
+      });
+    } else {
+      bar = f.bars[f.bars.length - 1];
+      idx = bar._i;
+      PRICE_DEFS.forEach(function (def) { smaVals[def.id] = f.lastSMA[def.id]; });
+    }
+
+    var prev = (bar._i > 0) ? f.bars[bar._i - 1] : null;
+    var chg = prev ? round2(bar.close - prev.close) : null;
+    var chgPct = prev && prev.close ? (bar.close - prev.close) / prev.close * 100 : null;
+
+    var html =
+      '<span class="lg-title">' + esc(bar.time !== undefined ? ymd(bar.time) + " " + hhmmss(bar.time) : BLANK) + '</span>' +
+      cell("O", num(bar.open)) +
+      cell("H", num(bar.high)) +
+      cell("L", num(bar.low)) +
+      cell("C", num(bar.close)) +
+      cell("\u0394", signed(chg) + " (" + pctStr(chgPct) + ")", dir(chg));
+
+    PRICE_DEFS.forEach(function (def) {
+      var v = smaVals[def.id];
+      html += cell("SMA" + def.period, (v === null || v === undefined) ? BLANK : num(v), "", def.color);
+    });
+
+    ANALYTICS_PERIODS.forEach(function (p) {
+      var a = anOf(f, p), sc = (idx >= 0) ? a.chgScaled[idx] : a.chgScaled[a.chgScaled.length - 1];
+      var pl = (idx >= 0) ? a.plus[idx] : a.lastPlus, mi = (idx >= 0) ? a.minus[idx] : a.lastMinus;
+      var txt = (sc === null || sc === undefined) ? BLANK : fmtScaled(sc, PCT_DP) + "%";
+      html += cell("SMA" + p + " \u0394", txt, sc === null || sc === undefined ? "flat" : dir(sc), colorFor(p, 0)) +
+        cell("SMA" + p + " run", "+" + pl + " / \u2212" + mi, "");
+    });
+
+    var dRow = f.dir || { above: [], below: [], lastAbove: 0, lastBelow: 0 };
+    html += cell("SMA" + DIR_FAST + "v" + DIR_SLOW + " dir",
+      countLabel((idx >= 0) ? dRow.above[idx] : dRow.lastAbove,
+                 (idx >= 0) ? dRow.below[idx] : dRow.lastBelow), "");
+
+    /* the crossing read-out: the candle this line describes -- the one under the
+       crosshair, or the last candle of the timeframe when there is no crosshair, which
+       is what every other cell on this line reads too. A candle that carries no
+       crossing reads 'none' and an empty distance; the crossing is never borrowed from
+       a neighbouring candle. */
+    var xRow = f.cross || { dir: [], dist: [], lastIndex: null };
+    var xi = (idx >= 0) ? idx : xRow.lastIndex;
+    var xd = (xi === null || xi === undefined) ? null : xRow.dir[xi];
+    var xv = (xi === null || xi === undefined) ? null : xRow.dist[xi];
+    html += cell("SMA" + X_FAST + "v" + X_SLOW + " cross",
+      (xi === null || xi === undefined) ? BLANK : (xd ? xd.toUpperCase() : "none"),
+      xd === "ABOVE" ? "up" : (xd === "BELOW" ? "down" : "")) +
+      cell("SMA" + X_FROM + "v" + X_TO + " dist",
+        (xv === null || xv === undefined) ? BLANK : fmtScaled(xv, PCT_DP) + "%",
+        (xv === null || xv === undefined) ? "" : dir(xv));
+
+    /* the relationship read-out: the same candle this whole line describes, with an
+       empty cell (BLANK) where the two averages are equal or the slow one has no value */
+    var rRow = f.rel || { words: [], lastIndex: null };
+    var ri = (idx >= 0) ? idx : rRow.lastIndex;
+    var rw = (ri === null || ri === undefined) ? null : rRow.words[ri];
+    html += cell("SMA" + R_FAST + "v" + R_SLOW + " side",
+      (rw === null || rw === undefined) ? BLANK : rw,
+      rw === "ABOVE" ? "up" : (rw === "BELOW" ? "down" : ""));
+
+    /* each arrow rule for the same candle this line describes: the marker that is (or is
+       not) drawn beside the bar, read from the array the markers and the CSV's flag are
+       both built from */
+    var li = (idx >= 0) ? idx : f.bars.length - 1;
+    RULES.forEach(function (rule) {
+      if (!rule.on) { return; }
+      var flags = flagsOf(f, rule).flags;
+      html += cell(rule.label, flags[li] ? rule.mark : BLANK,
+        flags[li] ? arrowClass(rule) : "");
+    });
+
+    html += cell("ATM", bar.atm === null || bar.atm === undefined ? BLANK : num(bar.atm, 0)) +
+      cell("ticks", bar.ticks === null || bar.ticks === undefined ? BLANK : num(bar.ticks, 0));
+
+    document.getElementById(idOf("legend", f)).innerHTML = html;
+  }
+
+  /* ================= cursor badge =================
+
+     The four analytics families for the candle under the pointer: the three
+     consecutive counts, the SMA 2 vs SMA 9 direction streak, the strict crossing and
+     the SMA 9 vs SMA 44 distance it carried. Every value is read from f.an, f.dir and
+     f.cross -- the same arrays the analytics table and both exports are built from -- and
+     formatted by the same helpers (countLabel / fmtScaled / dir), so the badge can
+     neither invent a number nor disagree with the table. Nothing is recomputed here,
+     and a candle with no crossing reads 'none' with an empty distance, exactly as
+     Row A8 / A9 and the CSV do.
+
+     It adds one line per arrow rule: whether that rule fired on that candle, which is the
+     same flag the marker beside the bar is drawn from. Everything else is a read-out
+     rather than a signal -- no wording beyond the table's own tokens. It is shown only
+     while a pointer is on the chart, and hidden when the pointer leaves, when the
+     timeframe or session changes, and in print. */
+  function badgeHtml(f, i) {
+    var bar = f.bars[i];
+    var html = '<span class="cb-head">' + esc(hhmmss(bar.time)) + "</span>";
+    ANALYTICS_PERIODS.forEach(function (p) {
+      var a = anOf(f, p);
+      html += '<br><span class="cb-k">SMA' + p + " run</span>" +
+        '<span class="cb-v">' + countLabel(a.plus[i], a.minus[i]) + "</span>";
+    });
+    var d = f.dir || { above: [], below: [] };
+    html += '<br><span class="cb-k">SMA' + DIR_FAST + "v" + DIR_SLOW + " dir</span>" +
+      '<span class="cb-v">' + countLabel(d.above[i], d.below[i]) + "</span>";
+    var x = f.cross || { dir: [], dist: [] };
+    var xd = x.dir[i], xv = x.dist[i];
+    html += '<br><span class="cb-k">cross</span><span class="cb-v ' +
+      (xd === "ABOVE" ? "up" : (xd === "BELOW" ? "down" : "flat")) + '">' +
+      (xd === null || xd === undefined ? "none" : xd) + "</span>";
+    html += '<br><span class="cb-k">d(' + X_FROM + "," + X_TO + ")</span>" +
+      '<span class="cb-v ' + ((xv === null || xv === undefined) ? "flat" : dir(xv)) + '">' +
+      ((xv === null || xv === undefined) ? BLANK : fmtScaled(xv, PCT_DP) + "%") + "</span>";
+    var r = f.rel || { words: [] };
+    var rw = r.words[i];
+    html += '<br><span class="cb-k">' + R_FAST + "v" + R_SLOW + "</span>" +
+      '<span class="cb-v ' + (rw === "ABOVE" ? "up" : (rw === "BELOW" ? "down" : "flat")) +
+      '">' + (rw === null || rw === undefined ? "none" : rw) + "</span>";
+    RULES.forEach(function (rule) {
+      if (!rule.on) { return; }
+      var fired = flagsOf(f, rule).flags[i];
+      html += '<br><span class="cb-k">' + rule.label + '</span><span class="cb-v ' +
+        (fired ? arrowClass(rule) : "flat") + '">' + (fired ? rule.mark : BLANK) + "</span>";
+    });
+    return html;
+  }
+
+  function hideBadge(f) {
+    var box = document.getElementById(idOf("badge", f));
+    if (box) { box.setAttribute("data-on", "false"); box.dataset.i = ""; }
+  }
+
+  function hideBadges() {
+    Array.prototype.forEach.call(document.querySelectorAll(".cursor-badge"), function (b) {
+      b.setAttribute("data-on", "false"); b.dataset.i = "";
+    });
+  }
+
+  /* The badge follows the pointer: 16 px right and below, flipped to the other side of
+     the cursor when that would leave the chart, then clamped inside it. Only the
+     transform moves, so sweeping the chart costs no layout and no re-render -- the eight
+     lines are rebuilt only when the candle under the pointer changes. */
+  function showBadge(f, param, idx) {
+    var box = document.getElementById(idOf("badge", f));
+    var host = document.getElementById(idOf("chart", f));
+    if (!box || !host) { return; }
+    if (!param || idx === null || idx === undefined || idx < 0 || idx >= f.bars.length) {
+      hideBadge(f);
+      return;
+    }
+    if (box.dataset.i !== String(idx)) {
+      box.innerHTML = badgeHtml(f, idx);
+      box.dataset.i = String(idx);
+    }
+    box.setAttribute("data-on", "true");
+
+    var pt = param.point || { x: 0, y: 0 };
+    var bw = box.offsetWidth, bh = box.offsetHeight;
+    var w = host.clientWidth, h = host.clientHeight;
+    var left = pt.x + 16, top = pt.y + 14;
+    if (left + bw > w - 8) { left = pt.x - bw - 16; }
+    if (left < 8) { left = 8; }
+    if (top + bh > h - 8) { top = pt.y - bh - 14; }
+    if (top < 8) { top = 8; }
+    box.style.transform = "translate(" + Math.round(left) + "px," + Math.round(top) + "px)";
+  }
+
+  /* ================= analytics table =================
+     Ten metric rows, one column per candle: the candle time, a percentage change and a
+     consecutive run length for each of SMA 2, 9 and 44, the SMA 2 vs SMA 9 direction
+     streak, the strict SMA 2 vs SMA 9 cross direction, the SMA 9 vs SMA 44 distance (%)
+     carried by that crossing, and which side of each other SMA 9 and SMA 44 sit on.
+     Percentage changes are blank where the previous average does not exist; the crossing
+     cells are blank where no crossing occurred; the relationship cells are blank where
+     the two averages are equal or the slow one has no value yet. Built once per timeframe
+     and reused. */
+
+  function renderAnalytics(f) {
+    var t0 = (window.performance && performance.now) ? performance.now() : 0;
+    var n = f.bars.length;
+    var an = ANALYTICS_PERIODS.map(function (p) { return f.an[p]; });
+    var seconds = f.tf < 60;
+
+    var labels = ["Candle / Time"];
+    ANALYTICS_PERIODS.forEach(function (p, i) {
+      labels.push('<span class="swatch" style="background:' + colorFor(p, i) + '"></span>SMA ' + p + " Change (%)");
+    });
+    ANALYTICS_PERIODS.forEach(function (p) {
+      labels.push("SMA " + p + " Consecutive Count (+N / \u2212N)");
+    });
+    labels.push("SMA " + DIR_FAST + " vs SMA " + DIR_SLOW +
+      " Direction Streak (+ABOVE / \u2212BELOW)");
+    labels.push("SMA " + X_FAST + " vs SMA " + X_SLOW + " Cross Direction");
+    labels.push("SMA " + X_FROM + " vs SMA " + X_TO + " Distance (%) at SMA " +
+      X_FAST + "/" + X_SLOW + " Cross");
+    labels.push("SMA " + R_FAST + " vs SMA " + R_SLOW + " (ABOVE / BELOW)");
+
+    var head = '<thead><tr><th class="rowlab">' + labels[0] + "</th>";
+    for (var i = 0; i < n; i++) {
+      head += '<th data-i="' + i + '">' + (seconds ? hhmmss(f.bars[i].time) : hhmm(f.bars[i].time)) + "</th>";
+    }
+    head += "</tr></thead>";
+
+    var rows = ["<tbody>"];
+    var cells = new Array(n);
+    for (var c = 0; c < n; c++) { cells[c] = []; }
+
+    /* row A2/A3: percentage change, blank when the previous average is unavailable */
+    var k;
+    for (k = 0; k < ANALYTICS_PERIODS.length; k++) {
+      var p = ANALYTICS_PERIODS[k];
+      rows.push('<tr><th class="rowlab">' + labels[1 + k] + "</th>");
+      for (i = 0; i < n; i++) {
+        var sc = an[k].chgScaled[i];
+        if (sc === null) {
+          // no previous average to divide by: the cell is left blank, exactly as the
+          // CSV leaves the field empty (the tooltip explains why)
+          rows.push('<td class="blank" data-i="' + i + '" title="no previous SMA ' + p +
+            ' - change cannot be computed"></td>');
+        } else {
+          rows.push('<td class="' + dir(sc) + '" data-i="' + i + '">' + fmtScaled(sc, PCT_DP) + "</td>");
+        }
+      }
+      rows.push("</tr>");
+    }
+
+    /* row A4/A5: the current run of rising / falling changes through this candle */
+    for (k = 0; k < ANALYTICS_PERIODS.length; k++) {
+      var pp = ANALYTICS_PERIODS[k];
+      rows.push('<tr><th class="rowlab">' + labels[1 + ANALYTICS_PERIODS.length + k] + "</th>");
+      for (i = 0; i < n; i++) {
+        rows.push('<td data-i="' + i + '">' + countLabel(an[k].plus[i], an[k].minus[i]) + "</td>");
+      }
+      rows.push("</tr>");
+    }
+
+    /* row A6: the SMA 2 vs SMA 9 direction streak -- ABOVE in the + slot, BELOW in the
+       negative one, the two being mutually exclusive */
+    var dirRow = f.dir || { above: [], below: [] };
+    rows.push('<tr><th class="rowlab" title="' + esc(DIR_RULE) + '">' +
+      labels[1 + ANALYTICS_PERIODS.length * 2] + "</th>");
+    for (i = 0; i < n; i++) {
+      rows.push('<td data-i="' + i + '">' + countLabel(dirRow.above[i], dirRow.below[i]) + "</td>");
+    }
+    rows.push("</tr>");
+
+    /* row A8: the strict cross -- ABOVE or BELOW on the crossing candle, and a genuinely
+       empty cell on every other candle (the cell's tooltip carries the rule) */
+    var xRow = f.cross || { dir: [], dist: [], lastIndex: null };
+    rows.push('<tr><th class="rowlab" title="' + esc(CROSS_RULE) + '">' +
+      labels[1 + ANALYTICS_PERIODS.length * 2 + 1] + "</th>");
+    for (i = 0; i < n; i++) {
+      var xd = xRow.dir[i];
+      if (xd === null || xd === undefined) {
+        rows.push('<td class="blank" data-i="' + i + '" title="no strict SMA ' + X_FAST +
+          '/SMA ' + X_SLOW + ' crossing on this candle"></td>');
+      } else if (xd === "ABOVE") {
+        rows.push('<td class="up" data-i="' + i + '" title="SMA ' + X_FAST +
+          ' crossed from below SMA ' + X_SLOW + ' to above it">ABOVE</td>');
+      } else {
+        rows.push('<td class="down" data-i="' + i + '" title="SMA ' + X_FAST +
+          ' crossed from above SMA ' + X_SLOW + ' to below it">BELOW</td>');
+      }
+    }
+    rows.push("</tr>");
+
+    /* row A9: the distance at that crossing, on that candle; empty when there is no
+       crossing, or when the average it divides by does not exist yet */
+    rows.push('<tr><th class="rowlab" title="' + esc(CROSS_DISTANCE_RULE) + '">' +
+      labels[1 + ANALYTICS_PERIODS.length * 2 + 2] + "</th>");
+    for (i = 0; i < n; i++) {
+      var xv = xRow.dist[i];
+      if (xv === null || xv === undefined) {
+        rows.push('<td class="blank" data-i="' + i + '" title="no crossing on this candle' +
+          ', or SMA ' + X_TO + ' is not available yet"></td>');
+      } else {
+        rows.push('<td class="' + dir(xv) + '" data-i="' + i + '" title="SMA ' + X_FROM +
+          ' vs SMA ' + X_TO + ' on the crossing candle">' + fmtScaled(xv, PCT_DP) + "</td>");
+      }
+    }
+    rows.push("</tr>");
+
+    /* row A10: which side of each other SMA 9 and SMA 44 sit on -- one word on every
+       candle both averages exist, and a genuinely empty cell where they are equal or
+       SMA 44 has no value yet (the cell's tooltip carries the rule) */
+    var relRow = f.rel || { words: [] };
+    rows.push('<tr><th class="rowlab" title="' + esc(REL_RULE) + '">' +
+      labels[1 + ANALYTICS_PERIODS.length * 2 + 3] + "</th>");
+    for (i = 0; i < n; i++) {
+      var rw = relRow.words[i];
+      if (rw === null || rw === undefined) {
+        rows.push('<td class="blank" data-i="' + i + '" title="SMA ' + R_FAST + ' and SMA ' +
+          R_SLOW + ' are equal on this candle, or one of them has no value yet"></td>');
+      } else {
+        rows.push('<td class="' + (rw === "ABOVE" ? "up" : "down") + '" data-i="' + i +
+          '" title="SMA ' + R_FAST + (rw === "ABOVE" ? " is above " : " is below ") +
+          'SMA ' + R_SLOW + ' on this candle">' + rw + "</td>");
+      }
+    }
+    rows.push("</tr>");
+    rows.push("</tbody>");
+
+    document.getElementById(idOf("an", f)).innerHTML =
+      '<table class="an">' + head + rows.join("") + "</table>";
+
+    /* column handles, so the crosshair can highlight and scroll to its candle */
+    var box = document.getElementById(idOf("an", f));
+    var trs = box.querySelectorAll("tbody tr");
+    for (i = 0; i < n; i++) {
+      for (var r = 0; r < trs.length; r++) {
+        var td = trs[r].children[i + 1];
+        if (td) { cells[i].push(td); }
+      }
+    }
+    f.anCells = cells;
+    f.anHeadCells = box.querySelectorAll("thead th[data-i]");
+    f.anBuilt = true;
+    f.anMs = ((window.performance && performance.now) ? performance.now() : 0) - t0;
+
+    var blankNote = ANALYTICS_PERIODS.map(function (p) {
+      return "SMA " + p + " first " + p;
+    }).join(" \u00b7 ");
+    document.getElementById(idOf("anmeta", f)).textContent =
+      n + " candle columns \u00b7 " + (ANALYTICS_PERIODS.length * 2 + 4) + " metric rows \u00b7 built in " +
+      f.anMs.toFixed(0) +
+      " ms \u00b7 blank: " + blankNote + " candles (no previous average) \u00b7 " +
+      DIR_FAST + "v" + DIR_SLOW + " direction streak resets when neither side holds \u00b7 " +
+      X_FAST + "v" + X_SLOW + " cross = ABOVE / BELOW on a strict crossing only (\u00b7 " +
+      (xRow.crossings || 0) + " in this session) \u00b7 SMA " + X_FROM + "v" + X_TO +
+      " distance on those candles \u00b7 SMA " + R_FAST + "v" + R_SLOW +
+      " = which side the pair sits on, on every candle both exist" +
+      RULES.map(function (rule) {
+        return " \u00b7 " + rule.label + " = " + (rule.on
+          ? (flagsOf(f, rule).arrows + " on this timeframe, drawn " + arrowSide(rule) +
+             " the bar")
+          : "off in this recipe");
+      }).join("");
+    return f.anMs;
+  }
+
+  /* The analytics table is the deliverable and is always built -- but on the 12s tab it
+     is 6 x 1,881 = 11,286 cells, which is enough DOM to hold up the first paint if it is
+     injected synchronously during boot. It is therefore queued one frame ahead: the
+     chart and the page paint immediately, the table lands a frame later. Nothing is
+     deferred indefinitely and the print path still builds it synchronously. */
+  function scheduleAnalytics(f) {
+    if (f.anBuilt || f.anQueued) { return; }
+    f.anQueued = true;
+    var meta = document.getElementById(idOf("anmeta", f));
+    if (meta) { meta.textContent = num(f.bars.length, 0) + " candle columns \u00b7 building\u2026"; }
+    var run = function () {
+      f.anQueued = false;
+      if (!f.anBuilt) { renderAnalytics(f); }
+    };
+    if (window.requestAnimationFrame) {
+      requestAnimationFrame(function () { window.setTimeout(run, 0); });
+    } else {
+      window.setTimeout(run, 0);
+    }
+  }
+
+  var highlighted = null;
+  var highlightedHead = null;
+
+  function focusColumn(f, idx) {
+    if (!f.anBuilt || idx === null || idx === undefined || idx < 0 || idx >= f.bars.length) { return; }
+    if (highlighted) {
+      highlighted.forEach(function (el) { el.classList.remove("is-hover"); });
+      highlighted = null;
+    }
+    if (highlightedHead) { highlightedHead.classList.remove("is-hover"); highlightedHead = null; }
+
+    var col = f.anCells[idx];
+    if (col && col.length) {
+      col.forEach(function (el) { el.classList.add("is-hover"); });
+      highlighted = col;
+      highlightedHead = f.anHeadCells[idx] || null;
+      if (highlightedHead) { highlightedHead.classList.add("is-hover"); }
+
+      /* keep the candle in view without yanking the table around: only scroll when
+         the column has actually left the window */
+      var box = document.getElementById(idOf("an", f));
+      var r = col[0].getBoundingClientRect(), br = box.getBoundingClientRect();
+      if (r.left < br.left + 172 || r.right > br.right - 6) {
+        box.scrollLeft += (r.left - br.left) - 180;
+      }
+    }
+  }
+
+  /* ================= candle ledger (appendix) ================= */
+
+  function highlightRow(f, time) {
+    var host = document.getElementById(idOf("tscroll", f));
+    if (!host || !host.firstChild) { return; }
+    var old = host.querySelector("tr.is-hover");
+    if (old) { old.classList.remove("is-hover"); }
+    if (time === null || time === undefined) { return; }
+    var row = host.querySelector('tr[data-time="' + time + '"]');
+    if (row) { row.classList.add("is-hover"); }
+  }
+
+  function renderTable(f) {
+    var head = "<thead><tr><th class='l'>#</th><th class='l'>Time IST</th><th>Open</th><th>High</th><th>Low</th>" +
+      "<th class='l'>Close</th><th>Chg</th><th>Chg %</th>" +
+      PRICE_DEFS.map(function (d) { return "<th>SMA(" + d.period + ")</th>"; }).join("") +
+      ANALYTICS_PERIODS.map(function (p) { return "<th>SMA" + p + " \u0394%</th>"; }).join("") +
+      ANALYTICS_PERIODS.map(function (p) { return "<th>SMA" + p + " streak</th>"; }).join("") +
+      "<th>SMA" + X_FAST + "v" + X_SLOW + " cross</th>" +
+      "<th>SMA" + X_FROM + "v" + X_TO + " dist %</th>" +
+      RULES.map(function (rule) {
+        return rule.on ? "<th title='" + esc(rule.rule) + "'>" + rule.label + "</th>" : "";
+      }).join("") +
+      "<th>ATM</th><th>Ticks</th></tr></thead>";
+    var body = [], prev = null, i, b, chg, chgPct;
+
+    for (i = 0; i < f.bars.length; i++) {
+      b = f.bars[i];
+      chg = prev === null ? null : round2(b.close - prev);
+      chgPct = (prev === null || prev === 0) ? null : (b.close - prev) / prev * 100;
+      var sCells = PRICE_DEFS.map(function (def) {
+        var v = f.smas[def.id][i];
+        return "<td>" + (v === null ? BLANK : num(v)) + "</td>";
+      }).join("");
+      var aCells = ANALYTICS_PERIODS.map(function (p) {
+        var sc = f.an[p].chgScaled[i];
+        return sc === null ? '<td class="blank"></td>'
+          : '<td class="' + dir(sc) + '">' + fmtScaled(sc, PCT_DP) + "</td>";
+      }).join("");
+      aCells += ANALYTICS_PERIODS.map(function (p) {
+        return "<td>" + countLabel(f.an[p].plus[i], f.an[p].minus[i]) + "</td>";
+      }).join("");
+      var xCells = '<td>' + (f.cross.dir[i] ? f.cross.dir[i].toUpperCase() : BLANK) + "</td>" +
+        "<td>" + (f.cross.dist[i] === null ? BLANK : fmtScaled(f.cross.dist[i], PCT_DP)) + "</td>";
+      // the appendix ledger carries every rule's flag as well -- one cell per rule, in
+      // rule order -- so the drawn arrow can be read off a row of numbers rather than
+      // only trusted
+      RULES.forEach(function (rule) {
+        if (!rule.on) { return; }
+        var fired = flagsOf(f, rule).flags[i];
+        xCells += '<td class="' + (fired ? arrowClass(rule) : "blank") + '">' +
+          (fired ? rule.mark : BLANK) + "</td>";
+      });
+      body.push('<tr data-time="' + b.time + '">' +
+        '<td class="l">' + (i + 1) + '</td>' +
+        '<td class="l">' + hhmmss(b.time) + '</td>' +
+        '<td>' + num(b.open) + '</td><td>' + num(b.high) + '</td><td>' + num(b.low) + '</td>' +
+        '<td class="l">' + num(b.close) + '</td>' +
+        '<td class="' + dir(chg) + '">' + signed(chg) + '</td>' +
+        '<td class="' + dir(chgPct) + '">' + pctStr(chgPct) + '</td>' +
+        sCells + aCells + xCells +
+        '<td>' + num(b.atm, 0) + '</td><td>' + num(b.ticks, 0) + '</td></tr>');
+      prev = b.close;
+    }
+
+    document.getElementById(idOf("tscroll", f)).innerHTML =
+      "<table>" + head + "<tbody>" + body.join("") + "</tbody></table>";
+    document.getElementById(idOf("tcount", f)).textContent = f.bars.length + " bars \u00b7 price SMA " +
+      PRICE_DEFS.map(function (d) { return d.period; }).join("/");
+    f.tableBuilt = true;
+  }
+
+  function setLedger(f, open) {
+    var box = document.getElementById(idOf("tscroll", f));
+    var btn = document.getElementById(idOf("ltoggle", f));
+    if (open && !f.tableBuilt) { renderTable(f); }
+    box.style.display = open ? "block" : "none";
+    btn.textContent = open ? "Hide ledger"
+      : "Show ledger (" + num(f.bars.length, 0) + " bars)";
+    f.ledgerOpen = open;
+  }
+
+  /* ================= chips ================= */
+
+  function renderChips(f) {
+    var first = f.bars[0], last = f.bars[f.bars.length - 1];
+    var high = Math.max.apply(null, f.bars.map(function (b) { return b.high; }));
+    var low = Math.min.apply(null, f.bars.map(function (b) { return b.low; }));
+    var chg = round2(last.close - first.open);
+    var chgPct = (last.close - first.open) / first.open * 100;
+
+    var items = [
+      ["bars", num(f.bars.length, 0), ""],
+      ["window", hhmmss(first.time) + "\u2013" + hhmmss(last.time), ""],
+      ["O", num(first.open), ""], ["H", num(high), ""], ["L", num(low), ""], ["C", num(last.close), ""],
+      ["\u0394", signed(chg) + " (" + pctStr(chgPct) + ")", dir(chg)]
+    ];
+    PRICE_DEFS.forEach(function (def) {
+      var v = f.lastSMA[def.id];
+      items.push(["SMA(" + def.period + ")", v === null ? BLANK : num(v), ""]);
+    });
+    ANALYTICS_PERIODS.forEach(function (p) {
+      var a = f.an[p];
+      items.push(["SMA" + p + " \u0394", a.last === null ? BLANK : fmtScaled(a.chgScaled[a.chgScaled.length - 1], PCT_DP) + "%",
+        a.last === null ? "flat" : dir(a.last)]);
+      items.push(["SMA" + p + " streak", countLabel(a.lastPlus, a.lastMinus), ""]);
+    });
+    items.push(["SMA" + DIR_FAST + "v" + DIR_SLOW + " dir",
+      countLabel(f.dir.lastAbove, f.dir.lastBelow), ""]);
+    items.push(["SMA" + X_FAST + "v" + X_SLOW + " crosses",
+      f.cross.crossings + " (\u2191" + f.cross.above + " / \u2193" + f.cross.below + ")", ""]);
+    items.push(["SMA" + X_FROM + "v" + X_TO + " dist at last cross",
+      (f.cross.lastIndex === null || f.cross.dist[f.cross.lastIndex] === null) ? BLANK
+        : fmtScaled(f.cross.dist[f.cross.lastIndex], PCT_DP) + "%", ""]);
+    items.push(["avg ticks/bar", num(f.bars.reduce(function (a, b) { return a + b.ticks; }, 0) / f.bars.length, 1), ""]);
+    RULES.forEach(function (rule) {
+      var sig = flagsOf(f, rule);
+      items.push([rule.label + (rule.on ? "s" : " (off)"),
+        rule.on ? sig.arrows + " of " + num(f.bars.length, 0) + " bars" : "off",
+        rule.on && sig.arrows ? arrowClass(rule) : "", rule.rule]);
+    });
+
+    document.getElementById(idOf("chips", f)).innerHTML = items.map(function (it) {
+      return '<span class="chip ' + it[2] + '"' + (it[3] ? ' title="' + esc(it[3]) + '"' : "") +
+        ">" + it[0] + " <b>" + it[1] + "</b></span>";
+    }).join("");
+  }
+
+  /* ================= comparison matrix ================= */
+
+  function matrixRender() {
+    var MFRAMES = TFS.map(function (tf) { return frameOf(activeDay, tf); });
+    function hi(f) { return Math.max.apply(null, f.bars.map(function (b) { return b.high; })); }
+    function lo(f) { return Math.min.apply(null, f.bars.map(function (b) { return b.low; })); }
+    function last(f) { return f.bars[f.bars.length - 1]; }
+
+    var rows = [
+      ["Bars in session", function (f) { return num(f.bars.length, 0); }],
+      ["Bar window (IST)", function (f) { return hhmmss(f.bars[0].time) + "\u2013" + hhmmss(last(f).time); }],
+      ["Session open", function (f) { return num(f.bars[0].open); }],
+      ["Session high", function (f) { return num(hi(f)); }],
+      ["Session low", function (f) { return num(lo(f)); }],
+      ["Session close", function (f) { return num(last(f).close); }],
+      ["Net change", function (f) { var c = last(f).close - f.bars[0].open; return '<span class="' + dir(c) + '">' + signed(c) + '</span>'; }],
+      ["Net change %", function (f) { var o = f.bars[0].open; var c = (last(f).close - o) / o * 100; return '<span class="' + dir(c) + '">' + pctStr(c) + '</span>'; }],
+      ["Session range", function (f) { return num(hi(f) - lo(f)); }],
+      ["Avg bar range", function (f) {
+        return num(f.bars.reduce(function (a, b) { return a + (b.high - b.low); }, 0) / f.bars.length); }]
+    ];
+
+    PRICE_DEFS.forEach(function (def) {
+      rows.push(["SMA(" + def.period + ") close", function (f) {
+        return '<span style="color:' + def.color + '">' +
+          (f.lastSMA[def.id] === null ? BLANK : num(f.lastSMA[def.id])) + "</span>"; }]);
+    });
+    PRICE_DEFS.forEach(function (def) {
+      rows.push(["Close vs SMA(" + def.period + ")", function (f) {
+        var v = f.lastSMA[def.id];
+        if (v === null) { return BLANK; }
+        var d = round2(last(f).close - v);
+        return '<span class="' + dir(d) + '">' + signed(d) + '</span>'; }]);
+    });
+    ANALYTICS_PERIODS.forEach(function (p) {
+      rows.push(["SMA(" + p + ") change % (last)", function (f) {
+        var a = f.an[p];
+        return a.last === null ? BLANK
+          : '<span class="' + dir(a.last) + '">' + fmtScaled(a.chgScaled[a.chgScaled.length - 1], PCT_DP) + "</span>"; }]);
+      rows.push(["SMA(" + p + ") consecutive (last)", function (f) { return countLabel(f.an[p].lastPlus, f.an[p].lastMinus); }]);
+      rows.push(["SMA(" + p + ") longest run", function (f) {
+        var a = f.an[p];
+        return "+" + Math.max.apply(null, a.plus) + " / \u2212" + Math.max.apply(null, a.minus); }]);
+    });
+    rows.push(["SMA(" + X_FAST + ") vs " + X_SLOW + " crossings", function (f) {
+      return f.cross.crossings + " (ABOVE " + f.cross.above + " / BELOW " + f.cross.below + ")"; }]);
+    rows.push(["SMA(" + X_FROM + ") vs " + X_TO + " dist % at cross (min \u00b7 max)", function (f) {
+      return f.cross.min === null ? BLANK
+        : fmtScaled(f.cross.min, PCT_DP) + " \u00b7 " + fmtScaled(f.cross.max, PCT_DP); }]);
+    rows.push(["SMA(" + DIR_FAST + ") vs " + DIR_SLOW + " direction (last)", function (f) {
+      return countLabel(f.dir.lastAbove, f.dir.lastBelow); }]);
+    rows.push(["SMA(" + DIR_FAST + ") vs " + DIR_SLOW + " direction longest", function (f) {
+      return "+" + f.dir.maxAbove + " / \u2212" + f.dir.maxBelow; }]);
+    rows.push(["SMA(" + R_FAST + ") vs " + R_SLOW + " above / below (candles)", function (f) {
+      return "ABOVE " + f.rel.above + " / BELOW " + f.rel.below +
+        " \u00b7 longest +" + Math.max.apply(null, f.rel.words.map(function (w) {
+          return w === "ABOVE" ? 1 : 0; })) + " / \u2212" + Math.max.apply(null, f.rel.words.map(function (w) {
+          return w === "BELOW" ? 1 : 0; })) + " (bars)"; }]);
+    /* each arrow rule across the scales: the tightest gate (a crossing whose distance to
+       the slow average is inside the window) beside the candles that pass all seven
+       conditions, so a coarse timeframe where a rule never fires reads as 0 rather than as
+       missing. Both rules are listed, so the mirror can be compared with the rule it
+       inverts timeframe by timeframe. */
+    RULES.forEach(function (rule) {
+      rows.push([rule.label + "s (cross + window)", function (f) {
+        return rule.on ? flagsOf(f, rule).per.distance_pct_at_cross : "off"; }]);
+      rows.push([rule.label + "s (all seven conditions)", function (f) {
+        if (!rule.on) { return "off"; }
+        var sig = flagsOf(f, rule);
+        return '<span class="' + (sig.arrows ? arrowClass(rule) : "") + '">' + sig.arrows +
+          " of " + num(f.bars.length, 0) + " bars</span>"; }]);
+    });
+    rows.push(["Avg ticks per bar", function (f) {
+      return num(f.bars.reduce(function (a, b) { return a + b.ticks; }, 0) / f.bars.length, 1); }]);
+
+    document.getElementById("matrix").innerHTML =
+      "<table><thead><tr><th>Metric</th>" +
+      MFRAMES.map(function (f) {
+        return "<th>" + esc(f.label) + " <span class=\"meta\">" + esc(f.day) + "</span></th>";
+      }).join("") +
+      "</tr></thead><tbody>" +
+      rows.map(function (r) {
+        return "<tr><th>" + r[0] + "</th>" + MFRAMES.map(function (f) {
+          return "<td>" + r[1](f) + "</td>"; }).join("") + "</tr>";
+      }).join("") +
+      "</tbody></table>";
+  }
+
+  /* ================= exports =================
+     Column set mirrors build_charts.CSV_COLUMNS exactly, so the browser export and
+     the pipeline's file for the same timeframe are byte-identical. */
+
+  function csvFor(f) {
+    var prev = null;
+    var out = [["time_ist", "epoch", "open", "high", "low", "close", "change", "change_pct"]
+      .concat(PRICE_DEFS.map(function (d) { return "sma" + d.period; }))
+      .concat(ANALYTICS_PERIODS.reduce(function (acc, p) {
+        return acc.concat(["sma" + p + "_chg_pct", "sma" + p + "_streak_plus", "sma" + p + "_streak_minus"]);
+      }, []))
+      .concat([DIR_ABOVE_COL, DIR_BELOW_COL])
+      .concat([CROSS_COL, CROSS_DIST_COL, CROSS_PAIR_COL])
+      .concat([REL_COL])
+      .concat(RULES.map(function (rule) { return rule.column; }))
+      .concat(["atm", "ticks", CE_OI_COL, PE_OI_COL]).join(",")];
+
+    f.bars.forEach(function (b, i) {
+      var chg = prev === null ? null : round2(b.close - prev);
+      var cp = (prev === null || prev === 0) ? null : (b.close - prev) / prev * 100;
+      var row = [ymd(b.time) + " " + hhmmss(b.time), b.time,
+        b.open.toFixed(2), b.high.toFixed(2), b.low.toFixed(2), b.close.toFixed(2),
+        fmtSigned(chg, 2), fmtSigned(cp, 3)];
+      PRICE_DEFS.forEach(function (def) {
+        var v = f.smas[def.id][i];
+        row.push(v === null ? "" : v.toFixed(2));
+      });
+      ANALYTICS_PERIODS.forEach(function (p) {
+        row.push(f.an[p].chgScaled[i] === null ? "" : fmtScaled(f.an[p].chgScaled[i], PCT_DP));
+        row.push(f.an[p].plus[i]);
+        row.push(f.an[p].minus[i]);
+      });
+      row.push(f.dir.above[i]);
+      row.push(f.dir.below[i]);
+      row.push(f.cross.dir[i] === null ? "" : f.cross.dir[i]);
+      row.push(f.cross.dist[i] === null ? "" : fmtScaled(f.cross.dist[i], PCT_DP));
+      row.push(f.cross.pair[i] === null ? "" : fmtScaled(f.cross.pair[i], PCT_DP));
+      row.push(f.rel.words[i] === null ? "" : f.rel.words[i]);
+      RULES.forEach(function (rule) { row.push(flagsOf(f, rule).flags[i]); });
+      row.push(b.atm, b.ticks);
+      /* the dashboard's minute pair, blank where the session ships no dashboard, exactly
+         as the pipeline's CSV writes them */
+      row.push(b[CE_OI_COL] === null || b[CE_OI_COL] === undefined ? "" : b[CE_OI_COL]);
+      row.push(b[PE_OI_COL] === null || b[PE_OI_COL] === undefined ? "" : b[PE_OI_COL]);
+      out.push(row.join(","));
+      prev = b.close;
+    });
+    return out.join("\n") + "\n";
+  }
+
+  function jsonFor(f) {
+    return {
+      meta: {
+        instrument: META.instrument, date: f.day, timeframeSeconds: f.tf,
+        label: f.label, priceSmaPeriods: PRICE_DEFS.map(function (d) { return d.period; }),
+        analyticsSmas: ANALYTICS_PERIODS.slice(), pctDecimals: PCT_DP,
+        bars: f.bars.length, session: DAY_BY[f.day].session
+      },
+      indicator: {
+        description: "Per-candle percentage change of SMA 2, SMA 9 and SMA 44 with the length of the current run of consecutive rising / falling changes, the SMA 2 vs SMA 9 direction streak, the strict SMA 2 vs SMA 9 cross direction, the SMA 9 vs SMA 44 distance (%) carried by that crossing, which side of each other SMA 9 and SMA 44 sit on, and two declared marker rules -- the green arrow and the red one that mirrors it, each 1 on the candles where all seven of its own conditions hold and 0 everywhere else.",
+        runRule: META.runRule || null,
+        directionStreak: { fastPeriod: DIR_FAST, slowPeriod: DIR_SLOW,
+                           aboveColumn: DIR_ABOVE_COL, belowColumn: DIR_BELOW_COL,
+                           rule: DIR_RULE },
+        cross: { fastPeriod: X_FAST, slowPeriod: X_SLOW,
+                 distanceFromPeriod: X_FROM, distanceToPeriod: X_TO,
+                 directionColumn: CROSS_COL, distanceColumn: CROSS_DIST_COL,
+                 pairDistanceColumn: CROSS_PAIR_COL,
+                 rule: CROSS_RULE, distanceRule: CROSS_DISTANCE_RULE },
+        relation: { fastPeriod: R_FAST, slowPeriod: R_SLOW,
+                    relationColumn: REL_COL, rule: REL_RULE },
+        signal: signalJson(SIG),
+        redSignal: signalJson(RED),
+        rows: ["Candle/Time"].concat(
+          ANALYTICS_PERIODS.map(function (p) { return "SMA " + p + " Change (%)"; }),
+          ANALYTICS_PERIODS.map(function (p) { return "SMA " + p + " Consecutive Count (+N / \u2212N)"; }),
+          ["SMA " + DIR_FAST + " vs SMA " + DIR_SLOW + " Direction Streak (+ABOVE / \u2212BELOW)",
+           "SMA " + X_FAST + " vs SMA " + X_SLOW + " Cross Direction",
+           "SMA " + X_FROM + " vs SMA " + X_TO + " Distance (%) at SMA " + X_FAST + "/" + X_SLOW + " Cross",
+           "SMA " + R_FAST + " vs SMA " + R_SLOW + " (ABOVE / BELOW)"])
+      },
+      crossRows: { directionColumn: CROSS_COL, distanceColumn: CROSS_DIST_COL,
+                   pairDistanceColumn: CROSS_PAIR_COL },
+      relationColumn: REL_COL,
+      signalColumn: SIG.column,
+      arrows: flagsOf(f, SIG).arrows,
+      redSignalColumn: RED.column,
+      redArrows: flagsOf(f, RED).arrows,
+      bars: f.bars.map(function (b, i) {
+        var rec = { time: b.time, timeIST: ymd(b.time) + " " + hhmmss(b.time),
+                    open: b.open, high: b.high, low: b.low, close: b.close, atm: b.atm, ticks: b.ticks };
+        PRICE_DEFS.forEach(function (def) { rec["sma" + def.period] = f.smas[def.id][i]; });
+        ANALYTICS_PERIODS.forEach(function (p) {
+          rec["sma" + p + "_chg_pct"] = f.an[p].chg[i];
+          rec["sma" + p + "_streak_plus"] = f.an[p].plus[i];
+          rec["sma" + p + "_streak_minus"] = f.an[p].minus[i];
+        });
+        rec[DIR_ABOVE_COL] = f.dir.above[i];
+        rec[DIR_BELOW_COL] = f.dir.below[i];
+        rec[CROSS_COL] = f.cross.dir[i];
+        rec[CROSS_DIST_COL] = f.cross.dist[i] === null ? null : f.cross.dist[i] / Math.pow(10, PCT_DP);
+        rec[CROSS_PAIR_COL] = f.cross.pair[i] === null ? null : f.cross.pair[i] / Math.pow(10, PCT_DP);
+        rec[REL_COL] = f.rel.words[i];
+        RULES.forEach(function (rule) { rec[rule.column] = flagsOf(f, rule).flags[i]; });
+        return rec;
+      })
+    };
+  }
+
+  function download(name, text, mime) {
+    var blob = new Blob([text], { type: mime + ";charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+  }
+
+  function exportName(f, ext) {
+    return "nifty_" + f.day + "_" + f.slug + "_sma" +
+      PRICE_DEFS.map(function (d) { return d.period; }).join("-") + "." + ext;
+  }
+
+  /* ================= wiring =================
+     Two axes: the day strip picks the session, the tabs pick the timeframe within it.
+     The timeframe choice is shared across days, so switching session keeps the scale
+     you were reading. */
+
+  function showDayPanels() {
+    Array.prototype.forEach.call(document.querySelectorAll(".daypanels"), function (d) {
+      d.setAttribute("data-active", String(d.dataset.day === activeDay));
+    });
+  }
+
+  function activate(tf) {
+    active = tf;
+    ensureDay(activeDay);
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
+      var on = String(t.dataset.tf) === String(tf);
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    showDayPanels();
+    Array.prototype.forEach.call(document.querySelectorAll(".panel"), function (p) {
+      p.setAttribute("data-active", String(p.dataset.day === activeDay &&
+        String(p.dataset.tf) === String(tf)));
+    });
+    /* a switch leaves every cursor badge behind: the panel it belongs to is gone, and
+       the next hover builds a fresh one */
+    hideBadges();
+    var f = curFrame();
+    ensureChart(f);
+    scheduleAnalytics(f);   // the table is the deliverable, but it must not delay the chart
+    scheduleFit(f);
+    return f;
+  }
+
+  /* ================= CE / PE OI change =================
+     The dashboard file beside the tape carries one row per minute: the feed's own
+     ce_oi_change / pe_oi_change for that minute (and the running totals, which this
+     chart does not draw). It is not a timeframe, it is the session's own summary, so
+     it gets one chart of its own rather than a sixth tab -- and every session plots
+     its own rows. */
+
+  var FLOW_COLORS = { ce: "#ef5350", pe: "#26a69a" };
+  var FLOW = { chart: null, ce: null, pe: null, zero: null, rows: [], at: {} };
+
+  /* the axis would otherwise print eleven-digit numbers, so the ticks are shortened to
+     a magnitude suffix; the feed names no unit for these totals, so none is claimed
+     here -- the legend prints the exact figure */
+  function flowAxis(v) {
+    var a = Math.abs(v), s = (v < 0 ? "-" : "");
+    if (a >= 1e9) { return s + (a / 1e9).toFixed(2) + "B"; }
+    if (a >= 1e6) { return s + (a / 1e6).toFixed(2) + "M"; }
+    if (a >= 1e3) { return s + (a / 1e3).toFixed(1) + "K"; }
+    return s + String(Math.round(a));
+  }
+
+  function flowRows() {
+    var d = DAY_BY[activeDay];
+    return (d && d.flow) ? d.flow : [];
+  }
+
+  /* the read-out prints the feed's two columns and nothing else: one number per minute,
+     already computed upstream, so there is no arithmetic to do here -- not even their
+     difference */
+  function flowLegend(row) {
+    var host = document.getElementById("flow-legend");
+    if (!row) { host.innerHTML = ""; return; }
+    host.innerHTML =
+      '<span class="lg-title">' + ymd(row.time) + " " + hhmm(row.time) + "</span>" +
+      cell("CE OI change", signed(row.ceOIChange, 0), "", FLOW_COLORS.ce) +
+      cell("PE OI change", signed(row.peOIChange, 0), "", FLOW_COLORS.pe);
+  }
+
+  function buildFlowChart() {
+    var chart = LWC.createChart(document.getElementById("flow-chart"), {
+      autoSize: true,
+      layout: {
+        background: { type: LWC.ColorType.Solid, color: "transparent" },
+        textColor: "#8b98a8",
+        fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Ubuntu,sans-serif",
+        fontSize: 11
+      },
+      grid: { vertLines: { color: "rgba(32,42,54,.55)" }, horzLines: { color: "rgba(32,42,54,.55)" } },
+      crosshair: {
+        mode: LWC.CrosshairMode.Normal,
+        vertLine: { color: C.accent, width: 1, style: LWC.LineStyle.Dashed, labelBackgroundColor: "#1f6feb" },
+        horzLine: { color: C.accent, width: 1, style: LWC.LineStyle.Dashed, labelBackgroundColor: "#1f6feb" }
+      },
+      rightPriceScale: { borderColor: "#202a36", scaleMargins: { top: 0.12, bottom: 0.12 } },
+      timeScale: {
+        borderColor: "#202a36", timeVisible: true, secondsVisible: false,
+        rightOffset: 2, barSpacing: 2, minBarSpacing: 0.02,
+        tickMarkFormatter: function (time) { return hhmm(time); }
+      },
+      localization: {
+        locale: "en-IN",
+        timeFormatter: function (time) { return ymd(time) + " " + hhmmss(time); },
+        priceFormatter: function (p) { return num(p, 0); }
+      },
+      handleScale: { axisPressedMouseMove: { time: true, price: false } }
+    });
+
+    ["ce", "pe"].forEach(function (key) {
+      FLOW[key] = chart.addSeries(LWC.LineSeries, {
+        color: FLOW_COLORS[key],
+        lineWidth: 2,
+        priceLineVisible: false, lastValueVisible: true,
+        crosshairMarkerVisible: true, crosshairMarkerRadius: 3.5,
+        priceFormat: { type: "custom", formatter: flowAxis, minMove: 1 }
+      });
+    });
+
+    /* a change series sits on one side of zero and can cross it, so the baseline is a
+       flat dashed series across the session -- a reading aid, not a plotted measurement */
+    FLOW.zero = chart.addSeries(LWC.LineSeries, {
+      color: "#3d4a5a", lineWidth: 1, lineStyle: LWC.LineStyle.Dashed,
+      priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+      priceFormat: { type: "custom", formatter: flowAxis, minMove: 1 }
+    });
+
+    chart.subscribeCrosshairMove(function (param) {
+      var row = (param && param.time !== undefined) ? FLOW.at[param.time] : null;
+      flowLegend(row || FLOW.rows[FLOW.rows.length - 1] || null);
+    });
+    FLOW.chart = chart;
+    return chart;
+  }
+
+  function renderFlow() {
+    var section = document.getElementById("flowsection");
+    var rows = flowRows();
+    FLOW.rows = rows;
+    FLOW.at = {};
+    rows.forEach(function (r) { FLOW.at[r.time] = r; });
+    // a session with no dashboard file hides the section instead of showing a blank box
+    if (!rows.length) { section.style.display = "none"; return; }
+    section.style.display = "";
+    var chart = FLOW.chart || buildFlowChart();
+    FLOW.ce.setData(rows.map(function (r) { return { time: r.time, value: r.ceOIChange }; }));
+    FLOW.pe.setData(rows.map(function (r) { return { time: r.time, value: r.peOIChange }; }));
+    FLOW.zero.setData(rows.map(function (r) { return { time: r.time, value: 0 }; }));
+    chart.timeScale().fitContent();
+    flowLegend(rows[rows.length - 1]);
+  }
+
+  function switchDay(day) {
+    if (!DAY_BY[day]) { return; }
+    activeDay = day;
+    ensureDay(day);
+    renderDayTabs();
+    renderTabs();
+    var framesToday = renderDayHeader();
+    framesToday.forEach(function (f) {
+      renderChips(f);
+      if (f.tableBuilt && !f.ledgerOpen) {
+        document.getElementById(idOf("tscroll", f)).innerHTML = "";
+        f.tableBuilt = false;
+      }
+    });
+    matrixRender();
+    renderFlow();
+    activate(active);
+  }
+
+  document.getElementById("daytabs").addEventListener("click", function (e) {
+    var btn = e.target.closest(".dtab");
+    if (btn) { switchDay(btn.dataset.day); }
+  });
+
+  document.querySelector("nav.tabs").addEventListener("click", function (e) {
+    var btn = e.target.closest(".tab");
+    if (btn) { activate(Number(btn.dataset.tf)); }
+  });
+
+  document.getElementById("panels").addEventListener("click", function (e) {
+    var btn = e.target.closest("button[id^='ltoggle-']");
+    if (!btn) { return; }
+    var key = btn.id.slice("ltoggle-".length);
+    var f = frames[key];
+    if (f) { setLedger(f, !f.ledgerOpen); }
+  });
+
+  document.querySelector("nav.tabs").addEventListener("keydown", function (e) {
+    var idx = TFS.indexOf(active);
+    if (e.key === "ArrowRight") { activate(TFS[(idx + 1) % TFS.length]); }
+    else if (e.key === "ArrowLeft") { activate(TFS[(idx - 1 + TFS.length) % TFS.length]); }
+    else if (e.key === "Home") { activate(TFS[0]); }
+    else if (e.key === "End") { activate(TFS[TFS.length - 1]); }
+    else { return; }
+    e.preventDefault();
+    document.getElementById("tab-" + active).focus();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") { return; }
+    var n = parseInt(e.key, 10);
+    if (!isNaN(n) && n >= 1 && n <= TFS.length) { activate(TFS[n - 1]); return; }
+    var d = DAYS.map(function (x) { return x.date; }).indexOf(activeDay);
+    if (e.key === "]" && d < DAYS.length - 1) { switchDay(DAYS[d + 1].date); }
+    else if (e.key === "[" && d > 0) { switchDay(DAYS[d - 1].date); }
+  });
+
+  /* Bar counts differ per day, so the tab badges and the period ceiling are read from
+     the day being displayed. */
+  function dayFrames() { return TFS.map(function (tf) { return frameOf(activeDay, tf); }); }
+
+  function refreshAll(rebuildTables) {
+    dayFrames().forEach(function (f) {
+      recomputePrice(f);   // price-pane lines only; the analytics are pinned
+      if (f.built) {
+        PRICE_DEFS.forEach(function (def) { f.lines[def.id].setData(f.smas[def.id + "Points"]); });
+      }
+      renderChips(f);
+      if (rebuildTables) {
+        // an open ledger must pick up the new SMA columns; a closed one is dropped so
+        // it is rebuilt only if the user opens it again
+        if (f.ledgerOpen) { renderTable(f); }
+        else if (f.tableBuilt) {
+          document.getElementById(idOf("tscroll", f)).innerHTML = "";
+          f.tableBuilt = false;
+        }
+      }
+      if (f.built) { renderLegend(f, null); }
+    });
+    matrixRender();
+  }
+
+  PRICE_DEFS.forEach(function (def, i) {
+    smaPeriodInput(i).addEventListener("change", function () {
+      var v = parseInt(this.value, 10);
+      if (isNaN(v) || v < 2) { v = 2; }
+      if (v > 600) { v = 600; }
+      var maxBars = Math.max.apply(null, dayFrames().map(function (f) { return f.bars.length; }));
+      if (v > maxBars) { v = maxBars; }
+      this.value = v;
+      def.period = v;
+      refreshAll(true);
+    });
+    smaToggle(i).addEventListener("change", function () {
+      var on = this.checked;
+      document.getElementById("smactl-" + i).classList.toggle("is-off", !on);
+      Object.keys(frames).forEach(function (k) {
+        if (frames[k].built) { frames[k].lines[def.id].applyOptions({ visible: on }); }
+      });
+    });
+  });
+
+  document.getElementById("btn-fit").addEventListener("click", function () {
+    var f = curFrame();
+    f.userZoomed = false;
+    fitNow(f);
+  });
+
+  document.getElementById("btn-csv").addEventListener("click", function () {
+    var f = curFrame();
+    download(exportName(f, "csv"), csvFor(f), "text/csv");
+  });
+
+  document.getElementById("btn-json").addEventListener("click", function () {
+    var f = curFrame();
+    download(exportName(f, "json"), JSON.stringify(jsonFor(f), null, 2), "application/json");
+  });
+
+  /* Printing covers the ACTIVE session: its five single-pane panels. Other days
+     are hidden so a three-session sheet does not print a 15-panel document. */
+  function setPrinting(on) {
+    document.body.classList.toggle("js-printing", on);
+    if (!on) { scheduleFit(curFrame()); return; }
+    // panels are laid out now, so every chart gets a real width to fit against
+    dayFrames().forEach(function (f) {
+      ensureChart(f);
+      if (!f.anBuilt) { f.anQueued = false; renderAnalytics(f); }
+      f.userZoomed = false;
+      fitNow(f);
+    });
+  }
+  window.addEventListener("beforeprint", function () { setPrinting(true); });
+  window.addEventListener("afterprint", function () { setPrinting(false); });
+
+  /* ================= boot =================
+     Only the first session is materialised; the other days are built the first time
+     they are opened, so a multi-session payload stays cheap to start. */
+
+  ensureDay(activeDay);
+  renderDayTabs();
+  renderTabs();
+  renderDayHeader();
+  /* the Method list's recipe cells, filled from the payload: the two arrow bullets and the
+     chart window print the values this build actually used */
+  renderMethod();
+  /* the chips of the session that is on screen are painted here rather than only when a
+     session or a price period changes: the arrow counts are two of them */
+  dayFrames().forEach(renderChips);
+  dayFrames().forEach(function (f) {
+    setLedger(f, f.bars.length <= LEDGER_EAGER_LIMIT);
+  });
+  matrixRender();
+  renderFlow();
+  activate(TFS[0]);
+
+  /* Console handle: lets you drive the sheet from devtools, e.g.
+     NIFTY_SHEET.setPeriod(1, 21), NIFTY_SHEET.table(12), NIFTY_SHEET.day("2026-10-14") */
+  window.NIFTY_SHEET = {
+    meta: META,
+    days: DAYS.map(function (d) { return d.date; }),
+    frames: frames,
+    tfs: TFS,
+    priceDefs: PRICE_DEFS,
+    analyticsPeriods: ANALYTICS_PERIODS,
+    day: function (d) {
+      if (d !== undefined) { switchDay(String(d)); }
+      return activeDay;
+    },
+    session: function (d) { return DAY_BY[d || activeDay].session; },
+    frame: function (tf, d) { return frameOf(d || activeDay, tf === undefined ? active : Number(tf)); },
+    key: keyOf,
+    activate: activate,
+    active: function () { return active; },
+    setPeriod: function (i, n) {
+      var inp = smaPeriodInput(i);
+      inp.value = n;
+      inp.dispatchEvent(new Event("change", { bubbles: true }));
+    },
+    toggleSMA: function (i, on) {
+      var cb = smaToggle(i);
+      cb.checked = on;
+      cb.dispatchEvent(new Event("change", { bubbles: true }));
+    },
+    renderAnalytics: renderAnalytics,
+    table: function (tf, d) { return frameOf(d || activeDay, tf === undefined ? active : Number(tf)); },
+    print: setPrinting,
+    flow: function (d) { return ((DAY_BY[d || activeDay] || {}).flow) || []; },
+    flowChart: function () { return FLOW.chart; },
+    csv: function (tf, d) { return csvFor(frameOf(d || activeDay, Number(tf))); },
+    json: function (tf, d) { return jsonFor(frameOf(d || activeDay, Number(tf))); },
+    /* both rules' blocks for a frame, keyed by column -- or one rule's own block when a
+       column is named: NIFTY_SHEET.signal(12), NIFTY_SHEET.signal(12, "2026-10-13", "red_arrow") */
+    signal: function (tf, d, rule) {
+      var sigs = frameOf(d || activeDay, tf === undefined ? active : Number(tf)).sigs || {};
+      return rule === undefined ? sigs : (sigs[rule] || null);
+    }
+  };
+})();
+</script>
+</body>
+</html>

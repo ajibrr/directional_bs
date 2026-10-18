@@ -1,0 +1,209 @@
+{
+  "_about": [
+    "NIFTY analytics build -- the recipe the pipeline runs on.",
+    "",
+    "  python build_charts.py                                   builds with this file",
+    "",
+    "Every key is optional: whatever is left out keeps the default in nifty/defaults.py.",
+    "A key whose name starts with '_' is a note and is ignored, so this file can explain",
+    "itself the way the TOML twin does with comments (a note named after a real setting,",
+    "such as '_enabled', is refused rather than ignored, so a note cannot switch one off).",
+    "An unknown section or key is refused rather than ignored, so a typo cannot quietly",
+    "change a build. Relative paths are relative to the project root."
+  ],
+
+  "instrument": {
+    "_note": "what the sheet calls the tape it is showing",
+    "name": "NIFTY 50"
+  },
+
+  "paths": {
+    "_note": [
+      "what a build reads and where it writes; each index owns one output tree, so output/nifty holds this recipe's exports and sheet and output/sensex holds SENSEX's. The two never share a day folder (2026-10-16 exists in both).",
+      "sources_glob names the sessions; a dashboard (same name, _DASHBOARD.json) with no tape beside it is a session too, read from its own nifty_seconds series. When both files are there the tape wins: it runs to the last second of the closing minute."
+    ],
+    "sources_dir": "input data",
+    "sources_glob": "NIFTY_*_PRICE_1SEC.jsonl",
+    "template": "templates/sheet.html",
+    "chart_lib": "vendor/lightweight-charts.standalone.production.js",
+    "output_dir": "output/nifty"
+  },
+
+  "timeframes": {
+    "_note": [
+      "The bar widths, in seconds: one chart tab and one CSV/JSON export each.",
+      "12s, 1m and 300 all parse; the list must not name the same width twice."
+    ],
+    "seconds": [12, 36, 60, 180, 300]
+  },
+
+  "sma": {
+    "_note": "The averages drawn on the price pane; they stay editable in the sheet's toolbar.",
+    "price_periods": [2, 9, 44]
+  },
+
+  "analytics": {
+    "_note": [
+      "The averages behind the analytics table and the CSV columns, and the percentage",
+      "precision every percentage is compared at. run_rule is the sentence the sheet",
+      "prints for the consecutive counts; it defaults in nifty/defaults.py."
+    ],
+    "periods": [2, 9, 44],
+    "pct_decimals": 4
+  },
+
+  "direction_streak": {
+    "_note": [
+      "The direction row: consecutive candles where the fast average sits above the slow",
+      "one while the slow one rises (ABOVE), or below it while the slow one falls (BELOW).",
+      "Both periods must appear in [analytics] periods above -- the row reads that",
+      "average's printed percentage change. The rule sentence is written from the two",
+      "periods unless it is overridden here."
+    ],
+    "fast_period": 2,
+    "slow_period": 9
+  },
+
+  "cross": {
+    "_note": [
+      "The crossing row and the distance row beneath it.",
+      "",
+      "  cross direction : ABOVE when SMA {fast} was below SMA {slow} on the previous",
+      "                    candle and is above it on this one; BELOW for the mirror image;",
+      "                    empty on every other candle, and on an equal pair, which is",
+      "                    never a strict crossing.",
+      "  distance (%)    : ((SMA {distance_from} - SMA {distance_to}) / SMA {distance_to})",
+      "                    * 100, read on the crossing candle only, at pct_decimals.",
+      "",
+      "All four periods must appear in [analytics] periods above. The two rule sentences",
+      "are written from these periods unless they are overridden here."
+    ],
+    "fast_period": 2,
+    "slow_period": 9,
+    "distance_from_period": 9,
+    "distance_to_period": 44
+  },
+
+  "relation": {
+    "_note": [
+      "The above/below relationship row: which side of each other two averages sit on,",
+      "one word per candle (ABOVE / BELOW), empty where they are equal or not available.",
+      "This is the CURRENT relationship, not a crossing: no previous candle is read. Both",
+      "periods must appear in [analytics] periods above. The rule sentence is written from",
+      "the two periods unless it is overridden here."
+    ],
+    "fast_period": 9,
+    "slow_period": 44
+  },
+
+  "signal": {
+    "_note": [
+      "The green arrow: ONE rule, seven conditions, all of them required (AND). Four are",
+      "read from the candle itself, three from the candle before it. Every one of them is",
+      "an ordinary column the rows above already carry, so the rule invents no series of",
+      "its own and cannot disagree with what the table shows.",
+      "",
+      "  1. the crossing row reads cross_direction            (current candle)",
+      "  2. the distance (%) at that cross is inside the window, both ends included",
+      "  3. the above/below relationship reads relation       (current candle)",
+      "  4. the session's dashboard, on the minute this candle opens in, reads",
+      "     pe_oi_change above ce_oi_change                     (current candle)",
+      "  5. the slow average's change (%) is strictly above chg_pct_min (previous candle)",
+      "  6. the fast average's FALLING run is streak_minus_min..streak_minus_max,",
+      "     while its rising run is 0                              (previous candle)",
+      "  7. the slow average's RISING run is streak_plus_min or more (previous candle)",
+      "",
+      "Each use_* boolean switches one condition on or off: true checks it, false skips",
+      "it. They are spelled out here rather than left to the built-in default, so this",
+      "file states the whole rule. use_flow off drops condition 4 only.",
+      "",
+      "The red arrow is configured independently in red_signal below (the same seven",
+      "conditions read the other way round); [signal] red_arrow only applies when no",
+      "red_signal section is present and the red rule is the green rule's mirror."
+    ],
+    "enabled": true,
+    "cross_direction": "ABOVE",
+    "relation": "ABOVE",
+    "distance_pct_at_cross_min": 0.0,
+    "distance_pct_at_cross_max": 0.025,
+    "chg_pct_min": 0.0005,
+    "streak_minus_min": 7,
+    "streak_minus_max": 15,
+    "streak_plus_min": 7,
+    "use_cross_direction": true,
+    "use_distance_pct": true,
+    "use_relation": true,
+    "use_flow": true,
+    "use_chg_pct": true,
+    "use_streak_minus": true,
+    "use_streak_plus": true,
+    "red_arrow": true
+  },
+
+  "red_signal": {
+    "_note": [
+      "The red arrow: ONE rule, seven conditions, all of them required (AND), for",
+      "SELL/SHORT signals -- the green rule's seven conditions read the other way round.",
+      "Four are read from the candle itself, three from the candle before it. Every one of",
+      "them is an ordinary column the rows above already carry, so the rule invents no",
+      "series of its own and cannot disagree with what the table shows.",
+      "",
+      "  1. the crossing row reads cross_direction            (current candle)",
+      "  2. the distance (%) at that cross is inside the window, both ends included",
+      "  3. the above/below relationship reads relation       (current candle)",
+      "  4. the session's dashboard, on the minute this candle opens in, reads",
+      "     ce_oi_change above pe_oi_change                     (current candle)",
+      "  5. the slow average's change (%) is strictly below chg_pct_min (previous candle)",
+      "  6. the fast average's FALLING run is streak_minus_min..streak_minus_max,",
+      "     while its rising run is 0                              (previous candle)",
+      "  7. the slow average's RISING run is streak_plus_min or more (previous candle)",
+      "",
+      "Each use_* boolean switches one condition on or off: true checks it, false skips",
+      "it. use_flow off drops condition 4 only; a session with no dashboard never reads it.",
+      "",
+      "An unknown key is refused rather than ignored, so a typo cannot quietly change a build.",
+      "Relative paths are relative to the project root."
+    ],
+    "enabled": true,
+    "cross_direction": "BELOW",
+    "relation": "BELOW",
+    "distance_pct_at_cross_min": -0.025,
+    "distance_pct_at_cross_max": 0.0,
+    "chg_pct_min": -0.0005,
+    "streak_minus_min": 7,
+    "streak_minus_max": 15,
+    "streak_plus_min": 7,
+    "use_cross_direction": true,
+    "use_distance_pct": true,
+    "use_relation": true,
+    "use_flow": true,
+    "use_chg_pct": true,
+    "use_streak_minus": true,
+    "use_streak_plus": true,
+    "red_arrow": true
+  },
+
+  "backtest": {
+    "_note": [
+      "The trade clock the backtest reads, in IST wall clock.",
+      "last_entry: no arrow whose candle opens after this is taken; a signal at the time",
+      "itself is still taken, and one after it is reported but not traded.",
+      "hard_exit: a position still open when the clock reaches this is closed there, at",
+      "that candle's opening price, whatever its profit or loss -- no trade is carried",
+      "past the hard exit."
+    ],
+    "last_entry": "15:10:00",
+    "hard_exit": "15:15:00"
+  },
+
+  "sheet": {
+    "_note": [
+      "The delivered sheet: its file name, its page title, and how many candles a chart",
+      "opens on. window_bars is a view, not a truncation -- the arrows, the table and both",
+      "exports always cover every candle. A double-click snaps a chart back to it."
+    ],
+    "name_template": "NIFTY_{range_slug}_SMA_sheet.html",
+    "title_template": "{instrument} · {range_label} · SMA {sma_slash} analytics",
+    "window_bars": 100
+  }
+}
